@@ -1,0 +1,6 @@
+.runtime/
+.omx/state/
+reference/*.jpg
+reference/*.mp4
+*.log
+node_modules/

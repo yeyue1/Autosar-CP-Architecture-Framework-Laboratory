@@ -1,0 +1,17 @@
+{
+  "name": "autosar-startup-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "零第三方依赖的 AUTOSAR Classic 启动与 UDS 诊断学习实验室",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "check": "node scripts/check.mjs",
+    "lint": "node scripts/check.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "verify": "npm run check && npm test",
+    "trace": "node scripts/export-trace.mjs"
+  }
+}

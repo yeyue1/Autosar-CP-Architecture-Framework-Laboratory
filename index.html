@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta name="description" content="在本机探索 AUTOSAR Classic 从上电到稳态运行，并通过 UDS、CDD、多 ECU 与多核启动实验学习系统架构。" />
+    <title>AUTOSAR 启动实验室 · Classic Platform</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/src/app.mjs"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="AUTOSAR 启动实验室首页">
+          <span class="brand-mark" aria-hidden="true"><span>A</span></span>
+          <span><strong>AUTOSAR <span class="brand-light">启动实验室</span></strong><small>CLASSIC PLATFORM <span> / </span> BOOT SEQUENCE LAB</small></span>
+        </a>
+        <div class="header-tag"><span class="status-dot"></span> 本地仿真 <span class="tag-divider">|</span> R24-11 示例配置</div>
+        <nav class="header-actions" aria-label="辅助工具">
+          <button class="text-button" id="steps-open"><span aria-hidden="true">☷</span> 步骤目录</button>
+          <button class="text-button" id="guide-open"><span class="book-icon" aria-hidden="true">?</span> 学习指南</button>
+          <button class="text-button" id="export-trace" title="导出当前状态、启动日志与总线记录">↓ 导出记录</button>
+        </nav>
+      </header>
+
+      <nav id="lab-switcher" class="lab-switcher" role="tablist" aria-label="AUTOSAR 学习工作区">
+        <button id="lab-tab-startup" class="lab-switcher-tab active" role="tab" aria-selected="true" aria-controls="startup-workspace" data-lab-view="startup"><span aria-hidden="true">01</span><strong>启动流程</strong><small>42 步 · ECU 上电到 RUN</small></button>
+        <button id="lab-tab-uds" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="uds-workspace" data-lab-view="uds" tabindex="-1"><span aria-hidden="true">02</span><strong>UDS 诊断与刷写</strong><small>会话 · DTC · ISO-TP · Flash</small></button>
+        <button id="lab-tab-system" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="system-workspace" data-lab-view="system" tabindex="-1"><span aria-hidden="true">03</span><strong>系统架构</strong><small>CDD · 多 ECU · 多核</small></button>
+        <div class="lab-switcher-note"><span>LEARNING WORKSPACE</span><strong id="lab-current-title">启动流程实验</strong></div>
+      </nav>
+
+      <section id="startup-workspace" class="lab-view active" role="tabpanel" aria-labelledby="lab-tab-startup">
+      <section class="control-bar" aria-label="仿真控制">
+        <div class="transport">
+          <button class="button primary" id="play-button" aria-label="开始启动" title="播放 / 暂停（空格）"><span aria-hidden="true">▶</span> <span id="play-label">开始启动</span></button>
+          <button class="button icon-button" id="previous-button" aria-label="上一步" title="上一步（←）">↤</button>
+          <button class="button" id="step-button" title="单步执行（→）；RUN 后推进 10ms"><span aria-hidden="true">↦</span> 单步</button>
+          <button class="button icon-button" id="reset-button" aria-label="重新上电" title="重新上电（R）">↻</button>
+          <label class="speed-control"><span class="sr-only">播放速度</span><select id="speed-select" aria-label="播放速度"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select></label>
+        </div>
+        <div class="metric"><span>虚拟时间 <span class="tiny-note">ms</span></span><strong id="virtual-time">0.000</strong></div>
+        <div class="metric"><span>启动进度</span><strong><span id="step-count">00</span><span class="metric-muted"> / 42</span></strong></div>
+        <div class="metric state-metric"><span>ECU 教学阶段</span><strong id="ecu-state">OFF</strong></div>
+        <div class="metric cpu-metric"><span>模拟 CPU 占用</span><strong><span id="cpu-load">0.0</span><span class="metric-muted"> %</span></strong></div>
+        <label class="scenario-control"><span>实验场景 <span class="tiny-note">切换将重新上电</span></span><select id="scenario-select" aria-label="实验场景"><option value="normal">正常冷启动</option></select></label>
+      </section>
+
+      <section class="phase-section" aria-label="七个启动阶段">
+        <div class="phase-track" id="phase-track"></div>
+        <div class="scrubber-row"><span id="progress-caption">准备就绪，等待 ECU 上电</span><input type="range" id="step-scrubber" aria-label="回放到启动步骤" min="0" max="42" value="0" step="1" /><span class="scrubber-hint">拖动回放 · 点击阶段跳转</span></div>
+      </section>
+
+      <main>
+        <div class="workspace">
+          <aside class="state-sidebar panel" aria-label="状态监视器">
+            <div class="panel-heading"><h2><span class="heading-mark blue"></span> 状态监视器</h2><span class="micro-label">LIVE</span></div>
+            <div class="state-section">
+              <h3>ECU 启动阶段 <span title="这是教学阶段显示，不是旧版 EcuM Fixed 完整状态机">ⓘ</span></h3>
+              <ol class="ecu-flow" id="ecu-flow">
+                <li data-state="OFF" class="current"><span class="flow-point"></span><span>断电 / 等待上电<code>OFF</code></span></li>
+                <li data-state="STARTUP_ONE"><span class="flow-point"></span><span>启动前期<code>STARTUP I · PRE-OS</code></span></li>
+                <li data-state="STARTUP_TWO"><span class="flow-point"></span><span>启动后期<code>STARTUP II · POST-OS</code></span></li>
+                <li data-state="RUN"><span class="flow-point"></span><span>稳态运行<code>RUN · APPLICATION</code></span></li>
+              </ol>
+            </div>
+            <div class="state-section kernel-section"><h3>模式与内核</h3><dl class="watch-list" id="watch-list"></dl></div>
+            <div class="experiment-note" id="experiment-note"><span class="micro-label">EXPERIMENT 01</span><strong>正常冷启动</strong><p>观察控制权如何从硬件，经过 EcuM 和 OS，最终交给应用。</p></div>
+          </aside>
+
+          <section class="architecture-panel panel" aria-label="AUTOSAR 分层架构">
+            <div class="panel-heading"><h2><span class="heading-mark green"></span> AUTOSAR 分层架构</h2><div class="heading-right"><span class="micro-label">执行路径实时映射</span><button class="small-button" id="follow-button" title="让右侧解释跟随当前执行步骤">跟随执行</button><button class="small-button" id="system-lab-open" title="打开 CDD / 多 ECU / 多核学习实验室">系统架构</button></div></div>
+            <div class="architecture-subtitle"><span id="architecture-caption">从底层硬件开始，逐层唤醒整套系统。</span><span class="chip neutral" id="profile-chip">单核 · EcuM Flexible</span></div>
+            <div class="architecture" id="architecture"><canvas id="flow-canvas" aria-hidden="true"></canvas><div id="architecture-layers"></div></div>
+            <div class="architecture-footer"><div class="legend"><span><i class="legend-dot pending"></i>未初始化</span><span><i class="legend-dot active"></i>当前步骤</span><span><i class="legend-dot ready"></i>已就绪</span><span><i class="legend-dot failed"></i>故障</span></div><span class="micro-label">点击模块，探索职责与 API</span></div>
+            <div class="signal-strip" id="signal-strip"><span class="signal-caption">应用信号链</span><span>Sensor <strong id="sensor-signal">—</strong></span><b>→</b><span>Controller <strong id="filtered-signal">—</strong></span><b>→</b><span>Actuator <strong id="actuator-signal">—</strong></span><span class="signal-heartbeat"><i class="status-dot" id="heartbeat-dot"></i> <span id="heartbeat-label">等待 RTE</span></span></div>
+          </section>
+
+          <aside class="inspector-panel panel" aria-label="当前步骤详解">
+            <div class="panel-heading"><h2><span class="heading-mark amber"></span> <span id="inspector-title">当前步骤详解</span></h2><span class="micro-label" id="inspector-index">READY</span></div>
+            <div id="inspector-content" class="inspector-content"><div class="welcome-state"><span class="power-symbol" aria-hidden="true">⏻</span><span class="eyebrow">FOLLOW THE FIRST INSTRUCTION</span><h3>一切，从上电开始。</h3><p>按下「开始启动」，沿着 42 个步骤看清一个 ECU 如何进入运行状态。</p><div class="welcome-tip"><kbd>→</kbd><span>也可以单步执行，按自己的节奏探索。</span></div></div></div>
+            <div class="inspector-bottom"><button id="breakpoint-button" class="breakpoint-button" title="在下一步执行之前暂停（B）"><span class="breakpoint-dot"></span><span id="breakpoint-label">在下一步设置断点</span></button></div>
+          </aside>
+        </div>
+
+        <div class="diagnostics">
+          <section class="log-panel panel" aria-label="启动时序日志">
+            <div class="panel-heading"><h2><span class="heading-mark amber"></span> 启动时序日志 <span id="log-count" class="count-badge">0</span></h2><div class="heading-right"><label class="autoscroll"><input type="checkbox" id="autoscroll" checked /> 自动跟随</label><label><span class="sr-only">日志筛选</span><input class="filter-input" id="log-filter" placeholder="筛选模块 / API" aria-label="日志筛选" /></label></div></div>
+            <div class="log-header"><span>TIME / ms</span><span>MODULE</span><span>EVENT</span></div>
+            <div class="log-body" id="log-body" tabindex="0"><div class="empty-state"><span class="empty-icon">⌁</span><span>启动事件将在这里留下足迹</span><small>时间戳使用可确定性回放的虚拟时间</small></div></div>
+          </section>
+
+          <section class="runtime-panel panel" aria-label="实时运行观测">
+            <div class="panel-heading runtime-heading"><div class="view-tabs" role="tablist" aria-label="运行视图"><button id="timeline-tab" class="view-tab selected" role="tab" aria-selected="true" aria-controls="timeline-view">OS 任务时序</button><button id="can-tab" class="view-tab" role="tab" aria-selected="false" aria-controls="can-view" tabindex="-1">CAN 总线 <span class="count-badge" id="frame-count">0</span></button></div><span class="micro-label" id="runtime-caption">等待 OS / RTE</span></div>
+            <div id="timeline-view" role="tabpanel" aria-labelledby="timeline-tab" class="runtime-view"><div class="timeline-legend" id="task-legend"></div><div class="timeline-container"><canvas id="task-canvas" aria-label="模拟单核周期任务执行甘特图"></canvas><div id="timeline-empty" class="timeline-empty">进入 RUN 后，观察任务周期与 CPU 时间片。<small>演示调度，不是真实 RTOS 或硬件测量</small></div></div><div class="timeline-footer"><span><span class="status-dot"></span> 单核固定优先级示例</span><span>最近 120ms · 虚拟时间</span></div></div>
+            <div id="can-view" role="tabpanel" aria-labelledby="can-tab" class="runtime-view" hidden><div class="can-status-row"><span id="can-status-label">CAN 尚未初始化</span><span class="micro-label">教学报文 · 非 DBC 导入</span></div><div class="can-table-wrap"><table class="can-table"><thead><tr><th>TIME / ms</th><th>方向</th><th>CAN ID</th><th>DATA / HEX</th></tr></thead><tbody id="can-frames"></tbody></table><div id="can-empty" class="can-empty">尚无总线流量</div></div></div>
+          </section>
+        </div>
+      </main>
+      </section>
+
+      <section id="uds-workspace" class="uds-dialog uds-workspace lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-uds" hidden><div class="dialog-heading workspace-heading"><div><span class="eyebrow">UDS LAB · ISO 14229 CONCEPTS / AUTOSAR DCM</span><h2>把诊断请求，沿着协议栈拆开看。</h2><p>教学诊断仪通过 CAN / ISO-TP 与当前 ECU 状态联动；所有 DID、DTC、权限和时间参数均为示例配置。</p></div></div><div class="uds-body">
+      <section class="uds-status" aria-label="UDS 状态"><div class="uds-status-card"><span>诊断链路</span><strong id="uds-link-state">ECU 未就绪</strong></div><div class="uds-status-card"><span>诊断会话</span><strong id="uds-session-state">默认会话 · 01</strong></div><div class="uds-status-card"><span>安全级别</span><strong id="uds-security-state">LOCKED</strong></div><div class="uds-status-card"><span>有效 DTC</span><strong><span id="uds-dtc-count">3</span> 条</strong></div><button class="button primary uds-run-button" id="uds-run-to-ready">运行 ECU 到 RUN</button><div class="uds-session-presets" aria-label="诊断会话快捷切换"><span>会话快捷切换</span><button data-uds-send="10 01"><strong>默认</strong><code>10 01</code></button><button data-uds-send="10 02"><strong>编程</strong><code>10 02</code></button><button data-uds-send="10 03"><strong>扩展</strong><code>10 03</code></button></div></section>
+      <div class="uds-workbench">
+        <section class="uds-service-panel"><div class="uds-section-heading"><div><span class="section-label">SERVICE CATALOG</span><h3>选择一个服务</h3></div><span class="micro-label">点击只会填入请求</span></div><div class="uds-service-list" id="uds-service-list"></div></section>
+        <section class="uds-console-panel"><div class="uds-section-heading"><div><span class="section-label">TESTER CONSOLE</span><h3>诊断仪请求 / ECU 响应</h3></div><button class="small-button" id="uds-reset">重置诊断状态</button></div><form id="uds-request-form" class="uds-request-form"><label for="uds-request-input">请求字节 · HEX</label><div><input id="uds-request-input" aria-label="UDS 请求字节" value="22 F1 90" spellcheck="false" autocomplete="off" /><button type="button" class="button" id="uds-auto-key" disabled>填入教学 Key</button><button type="submit" class="button primary" id="uds-send">发送请求</button></div></form><div class="uds-latest" id="uds-latest"><span class="uds-placeholder">先让 ECU 进入 RUN，再读取 VIN：<code>22 F1 90</code></span></div></section>
+        <section class="uds-transport-panel"><div class="uds-section-heading"><div><span class="section-label">CAN / ISO-TP</span><h3>传输帧</h3></div><span class="micro-label" id="uds-frame-count">0 FRAME</span></div><div class="uds-frame-table-wrap"><table class="uds-frame-table"><thead><tr><th>方向</th><th>ID</th><th>PCI</th><th>DATA / HEX</th></tr></thead><tbody id="uds-frame-list"></tbody></table><div id="uds-frame-empty" class="uds-frame-empty">发送请求后观察 SF / FF / FC / CF。</div></div></section>
+      </div>
+      <section class="flash-lab"><div class="uds-section-heading"><div><span class="section-label">FLASH PROGRAMMING LAB</span><h3>双分区教学刷写</h3></div><span class="micro-label">0x34 → 0x36 → 0x37 · CRC32</span></div><div class="flash-grid">
+        <div class="flash-image-panel"><label for="flash-profile-select">教学固件镜像</label><select id="flash-profile-select" aria-label="教学固件镜像"></select><div class="flash-image-meta" id="flash-image-meta"></div><div class="flash-actions"><button class="button" id="flash-prepare">准备刷写</button><button class="button" id="flash-next" disabled>执行下一步</button><button class="button primary" id="flash-auto">自动完成</button></div></div>
+        <div class="flash-bank-panel"><div class="flash-banks"><div id="flash-bank-a"><span>BANK A</span><strong>ACTIVE</strong></div><i>⇄</i><div id="flash-bank-b"><span>BANK B</span><strong>INACTIVE</strong></div></div><div class="flash-progress-head"><span id="flash-status">IDLE · 等待准备</span><strong id="flash-progress-label">0%</strong></div><div class="flash-progress"><i id="flash-progress-bar"></i></div><p id="flash-current-step">刷写仅修改浏览器内存中的教学状态。</p></div>
+        <div class="flash-log" id="flash-step-log"><div class="flash-log-empty">准备后逐步观察编程会话、SecurityAccess、擦除、传输、校验和激活。</div></div>
+      </div><div class="flash-warning"><strong>安全边界：</strong>不读取本机固件、不访问真实 ECU、不写磁盘或 Flash；镜像、地址、CRC 和双分区均为教学数据。</div></section>
+      <section class="private-lab"><div class="uds-section-heading"><div><span class="section-label">OEM PRIVATE EXTENSIONS</span><h3>虚构私有服务实验</h3></div><span class="micro-label">不是任何真实厂商协议</span></div><div class="private-service-list"><button data-uds-request="B0 01"><span>B0 01</span><strong>读取 Boot 信息</strong><small>默认会话可读；返回分区与版本</small></button><button data-uds-request="B1 01"><span>B1 01</span><strong>读取 OEM 实时量</strong><small>需要扩展/编程会话</small></button><button data-uds-request="B2 A5 01 01"><span>B2 A5 01 01</span><strong>控制 OEM 特性</strong><small>需要会话、安全解锁与项目令牌</small></button></div><p>这些 SID、字段和令牌由本项目虚构，用来练习“自定义语义仍必须经过 DCM 的长度、会话、安全和范围检查”。</p></section>
+      <section class="uds-learning"><div class="uds-section-heading"><div><span class="section-label">GUIDED PATH</span><h3>四步建立诊断直觉</h3></div><span class="micro-label" id="uds-goal-count">0 / 4 完成</span></div><div class="uds-goal-list"><button data-uds-goal="vin" data-uds-request="22 F1 90"><span>01</span><strong>读取 VIN</strong><small>认识 SID、DID 和多帧响应</small></button><button data-uds-goal="session" data-uds-request="10 03"><span>02</span><strong>进入扩展会话</strong><small>理解服务与会话权限</small></button><button data-uds-goal="security" data-uds-request="27 01"><span>03</span><strong>完成 Seed / Key</strong><small>观察请求顺序与 NRC</small></button><button data-uds-goal="dtc" data-uds-request="19 02 FF"><span>04</span><strong>读取并理解 DTC</strong><small>区分 DTC 号与状态字节</small></button></div></section>
+      <section class="uds-history-panel"><div class="uds-section-heading"><div><span class="section-label">TRANSACTION HISTORY</span><h3>诊断事务记录</h3></div><span class="micro-label">最近 40 条</span></div><div class="uds-history" id="uds-history"><div class="uds-history-empty">尚无事务。负响应也值得记录：它告诉你前置条件缺在哪里。</div></div></section>
+      <div class="uds-boundary"><strong>学习边界：</strong>SecurityAccess 使用可公开观察的玩具算法；刷写只改变浏览器内存中的教学分区，不实现真实 Flash 驱动、签名信任链、防回滚、DoIP、真实 P2/S3 定时或量产 DCM 配置。语义参考 <a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_DiagnosticCommunicationManager.pdf" target="_blank" rel="noreferrer">AUTOSAR DCM R24-11 ↗</a> 与 <a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_CANTransportLayer.pdf" target="_blank" rel="noreferrer">CanTp R24-11 ↗</a>。</div>
+    </div></section>
+
+      <section id="system-workspace" class="system-dialog system-workspace lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-system" hidden><div class="dialog-heading workspace-heading"><div><span class="eyebrow">SYSTEM ARCHITECTURE LAB · CDD / MULTI-ECU / MULTI-CORE</span><h2>从一个 ECU，走向完整系统。</h2><p>保留当前单 ECU、单核的 42 步基线，在独立实验中观察实例边界、依赖、并行启动与故障门控。</p></div></div><div id="system-lab-body" class="system-lab-body"></div></section>
+
+      <footer class="app-footer"><span><span class="status-dot"></span> OFFLINE READY <span class="footer-divider">/</span> 零依赖 · 所有仿真数据留在本机</span><span>教学行为模型，不替代量产 BSW、MCAL 或真实 ECU <button id="sources-open">查看边界与来源 ↗</button></span></footer>
+    </div>
+
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+    <dialog id="steps-dialog" class="steps-dialog"><div class="dialog-heading"><div><span class="eyebrow">42 STEPS · 7 PHASES</span><h2>沿着时间线，逐步探索。</h2><p>点击步骤回放到执行后状态；点击圆点设置执行前断点。</p></div><button class="dialog-close" data-close="steps-dialog" aria-label="关闭步骤目录">×</button></div><div class="step-directory" id="step-directory"></div><div class="dialog-footer"><button class="button" id="clear-breakpoints">清除所有断点</button><span id="breakpoint-count">0 个断点</span></div></dialog>
+
+    <dialog id="module-dialog" class="module-dialog"><div class="dialog-heading"><div><span class="eyebrow" id="module-dialog-eyebrow">MODULE ARCHITECTURE · STARTUP CONTEXT</span><h2 id="module-dialog-title">模块架构讲解器</h2><p id="module-dialog-summary">从当前模块出发，查看启动步骤与上下游软件路径。</p></div><button class="dialog-close" data-close="module-dialog" aria-label="关闭模块架构讲解器">×</button></div><div id="module-dialog-body" class="module-guide-body"></div></dialog>
+
+    <dialog id="guide-dialog" class="guide-dialog"><div class="dialog-heading"><div><span class="eyebrow">LEARN BY OBSERVING</span><h2>把启动顺序，变成你的直觉。</h2></div><button class="dialog-close" data-close="guide-dialog" aria-label="关闭学习指南">×</button></div><div class="guide-body">
+      <section class="guide-intro"><span class="guide-number">01</span><div><h3>先走通一次正常冷启动</h3><p>先以 1× 速度播放，再用单步和目录回放。重点观察：在 <code>StartOS()</code> 前后，执行上下文发生了什么变化？何时才具备启动应用的条件？</p></div></section>
+      <section class="guide-intro"><span class="guide-number">02</span><div><h3>在边界处停下来</h3><p>在下一步设置断点，或在步骤目录中点亮红点。比较 <code>EcuM_StartupTwo()</code>、<code>BswM_Init()</code>、<code>NvM_ReadAll()</code> 和 <code>Rte_Start()</code> 前后的状态。断点在执行前生效。</p></div></section>
+      <section class="guide-intro"><span class="guide-number">03</span><div><h3>故意制造一次异常</h3><p>分别尝试 PLL 不锁定、NvM 读取缓慢、NvM CRC 失败和 CAN Bus-Off。区分“无法继续启动”“延迟就绪”“使用默认数据”和“应用运行但无法通信”。切换场景会重新上电。</p></div></section>
+      <section class="quiz-section"><div class="section-label">CHECK YOUR UNDERSTANDING</div><h3>一个关键问题</h3><p id="quiz-question"></p><div class="quiz-options" id="quiz-options"></div><p id="quiz-feedback" class="quiz-feedback" aria-live="polite"></p><button class="text-button" id="quiz-next">换一道题 →</button></section>
+      <section id="scope-section" class="scope-section"><div class="section-label">SCOPE & SOURCES</div><h3>你正在运行什么？</h3><p>本工具是零依赖、确定性的离散事件教学模型。参考视频的 7 阶段 / 42 步和四大观测视图，启动 API 与解释以 <strong>AUTOSAR Classic R24-11 EcuM Flexible</strong> 为基线。步骤分组、任务周期、报文、时长和错误策略属于本项目示例配置，并不是 AUTOSAR 规定的唯一实现。</p><p>它不执行 AUTOSAR C 源码、不仿真 CPU 指令、不生成 ARXML / RTE，也不连接物理 CAN。STARTUP I / II 和 RUN 是方便与视频对照的教学阶段标签；不是声称现代 Flexible 内置了旧版 Fixed 的完整 RUN / POST-RUN 状态机。</p><ul class="source-list"><li><a href="https://www.bilibili.com/video/BV1duM16GELm/" target="_blank" rel="noreferrer">视频参考：沉璧浮光《我把 AUTOSAR 启动流程做成了动画》 ↗</a></li><li><a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_ECUStateManager.pdf" target="_blank" rel="noreferrer">AUTOSAR R24-11 · ECU State Manager ↗</a></li><li><a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_EXP_ModeManagementGuide.pdf" target="_blank" rel="noreferrer">AUTOSAR R24-11 · Mode Management Guide ↗</a></li><li><a href="/docs/learning-guide.md" target="_blank">本地详细学习手册 ↗</a></li></ul><p class="reference-note">复现依据：公开视频介绍、首帧和每 5 秒预览图。未获得原作者源码，未声称逐像素或逐 API 一致；这是独立编写的学习实现。</p></section>
+      <section class="shortcut-section"><h3>让探索更顺手</h3><span><kbd>Space</kbd> 播放 / 暂停</span><span><kbd>→</kbd> 单步</span><span><kbd>←</kbd> 回退</span><span><kbd>B</kbd> 下一步断点</span><span><kbd>R</kbd> 重新上电</span><span><kbd>Esc</kbd> 关闭弹窗</span></section>
+    </div></dialog>
+    <noscript><p class="noscript-message">本地仿真需要启用 JavaScript。无需联网或安装任何浏览器扩展。</p></noscript>
+  </body>
+</html>
