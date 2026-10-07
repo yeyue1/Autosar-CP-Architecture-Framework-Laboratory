@@ -1,6 +1,6 @@
 # AUTOSAR 启动实验室：学习指南
 
-这套环境帮助你回答三个问题：**此时谁在执行？下一步依赖什么？请求完成了，还是仅被接收？** 它是基于 AUTOSAR Classic R24-11 / EcuM Flexible 的教学状态仿真，不执行真实 ECU 固件。画面中的 STARTUP I、STARTUP II 和 RUN 是概念阶段标签，不等同于旧 EcuM Fixed 的完整状态机。版本、视频可见范围和官方资料见[来源说明](sources.md)。
+这套环境帮助你回答三个问题：**此时谁在执行？下一步依赖什么？请求完成了，还是仅被接收？** 它是基于 AUTOSAR Classic R24-11 / EcuM Flexible 的教学状态仿真，不执行真实 ECU 固件。画面中的 STARTUP I、STARTUP II 和 RUN 是概念阶段标签，不等同于旧 EcuM Fixed 的完整状态机。版本边界和官方资料见[来源说明](sources.md)。
 
 ## 建议的学习方式
 

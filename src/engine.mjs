@@ -111,6 +111,17 @@ export class BootSimulator {
     return this.getSnapshot();
   }
 
+  setBusOff(enabled) {
+    if (this._state.status !== "running") return this.getSnapshot();
+    const busOff = Boolean(enabled);
+    this._state.can.actual = busOff ? "SILENT_COM" : "FULL_COM";
+    this._state.can.state = busOff ? "BUS_OFF" : "ONLINE";
+    this._state.can.txEnabled = !busOff;
+    this._state.comm.actual = busOff ? "SILENT_COM" : "FULL_COM";
+    if (!busOff) this._busOffLogged = false;
+    return this.getSnapshot();
+  }
+
   step() {
     if (this._state.status === "blocked" || this._state.status === "running") {
       return this.getSnapshot();

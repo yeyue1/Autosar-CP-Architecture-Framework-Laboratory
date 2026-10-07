@@ -145,19 +145,20 @@ export function deriveTeachingKey(seedBytes) {
   return [(key >>> 24) & 0xff, (key >>> 16) & 0xff, (key >>> 8) & 0xff, key & 0xff];
 }
 
-function padFrame(bytes) {
-  return [...bytes, ...Array(Math.max(0, 8 - bytes.length)).fill(0)].slice(0, 8);
+function padFrame(bytes, size = 8) {
+  return [...bytes, ...Array(Math.max(0, size - bytes.length)).fill(0)];
 }
 
-function payloadFrames(payload, { senderId, receiverId, direction, phase }) {
-  if (payload.length <= 7) {
+function payloadFrames(payload, { senderId, receiverId, direction, phase, canFd = false }) {
+  const size = canFd ? 64 : 8;
+  if (payload.length <= (canFd ? 62 : 7)) {
     return [{
       phase,
       type: 'SF',
       owner: direction === 'TX' ? 'Tester' : 'ECU',
       direction,
       canId: hexId(senderId),
-      data: padFrame([payload.length, ...payload]),
+      data: canFd && payload.length > 7 ? padFrame([0, payload.length, ...payload], size) : padFrame([payload.length, ...payload]),
       payloadLength: payload.length,
     }];
   }
@@ -168,7 +169,7 @@ function payloadFrames(payload, { senderId, receiverId, direction, phase }) {
     owner: direction === 'TX' ? 'Tester' : 'ECU',
     direction,
     canId: hexId(senderId),
-    data: padFrame([0x10 | ((payload.length >>> 8) & 0x0f), payload.length & 0xff, ...payload.slice(0, 6)]),
+    data: padFrame([0x10 | ((payload.length >>> 8) & 0x0f), payload.length & 0xff, ...payload.slice(0, size - 2)], size),
     payloadLength: payload.length,
   }];
   frames.push({
@@ -182,15 +183,15 @@ function payloadFrames(payload, { senderId, receiverId, direction, phase }) {
   });
 
   let sequence = 1;
-  for (let offset = 6; offset < payload.length; offset += 7) {
+  for (let offset = size - 2; offset < payload.length; offset += size - 1) {
     frames.push({
       phase,
       type: 'CF',
       owner: direction === 'TX' ? 'Tester' : 'ECU',
       direction,
       canId: hexId(senderId),
-      data: padFrame([0x20 | (sequence & 0x0f), ...payload.slice(offset, offset + 7)]),
-      payloadLength: Math.min(7, payload.length - offset),
+      data: padFrame([0x20 | (sequence & 0x0f), ...payload.slice(offset, offset + size - 1)], size),
+      payloadLength: Math.min(size - 1, payload.length - offset),
       sequence,
     });
     sequence = (sequence + 1) & 0x0f;
@@ -198,17 +199,24 @@ function payloadFrames(payload, { senderId, receiverId, direction, phase }) {
   return frames;
 }
 
-export function buildIsoTpExchange(request, response = []) {
+export function buildIsoTpExchange(request, response = [], { testerCanId = TESTER_CAN_ID, ecuCanId = ECU_CAN_ID, canFd = false } = {}) {
+  for (const payload of [request, response]) {
+    if (!Array.isArray(payload) || payload.length > 4095 || payload.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) throw new RangeError('ISO-TP teaching payload must contain 0–4095 bytes.');
+  }
+  if (!request.length) throw new RangeError('ISO-TP request cannot be empty.');
+  for (const id of [testerCanId, ecuCanId]) if (!Number.isInteger(id) || id < 0 || id > 0x1fffffff) throw new RangeError('Invalid CAN identifier.');
   return [
     ...payloadFrames(request, {
-      senderId: TESTER_CAN_ID,
-      receiverId: ECU_CAN_ID,
+      senderId: testerCanId,
+      receiverId: ecuCanId,
+      canFd,
       direction: 'TX',
       phase: 'REQUEST',
     }),
     ...(response.length > 0 ? payloadFrames(response, {
-      senderId: ECU_CAN_ID,
-      receiverId: TESTER_CAN_ID,
+      senderId: ecuCanId,
+      receiverId: testerCanId,
+      canFd,
       direction: 'RX',
       phase: 'RESPONSE',
     }) : []),
@@ -275,11 +283,21 @@ function positiveResult(response, summary, explanation, extra = {}) {
 }
 
 export class UdsSimulator {
-  constructor() {
+  constructor({ s3Ms = 5000, securityDelayMs = 3000, asyncEraseMs = 0, testerCanId = TESTER_CAN_ID, ecuCanId = ECU_CAN_ID, canFd = false } = {}) {
+    for (const value of [s3Ms, securityDelayMs, asyncEraseMs]) if (!Number.isFinite(value) || value < 0) throw new RangeError('Diagnostic timers must be finite nonnegative milliseconds.');
+    this._config = { s3Ms, securityDelayMs, asyncEraseMs };
+    this.setTransport({ testerCanId, ecuCanId, canFd });
     this.reset();
   }
 
+  setTransport(options = {}) {
+    const transport = { ...this._transport, ...options };
+    buildIsoTpExchange([0], [], transport);
+    this._transport = transport;
+  }
+
   reset() {
+    const previousFlash = this._state?.flash;
     this._sequence = 0;
     this._seedCounter = 0;
     this._state = {
@@ -291,7 +309,11 @@ export class UdsSimulator {
       s3RefreshCount: 0,
       dtcs: createDtcs(),
       workshopCode: [0x00, 0x00, 0x00, 0x00],
-      flash: createFlashState(),
+      flash: createFlashState(previousFlash),
+      nowMs: 0,
+      s3RemainingMs: null,
+      securityDelayRemainingMs: 0,
+      pendingOperation: null,
       privateProtocol: createPrivateState(),
       latest: null,
       history: [],
@@ -302,9 +324,60 @@ export class UdsSimulator {
   getSnapshot() {
     return clone({
       ...this._state,
+      transport: this._transport,
       dtcCount: this._state.dtcs.filter((dtc) => dtc.status !== 0).length,
       transactionCount: this._state.history.length,
     });
+  }
+
+  reportDtc(id, status, label = '系统故障') {
+    if (!Number.isInteger(id) || id < 0 || id > 0xffffff || !Number.isInteger(status) || status < 0 || status > 255) throw new RangeError('Invalid DTC or status byte.');
+    const existing = this._state.dtcs.find((dtc) => dtc.id === id);
+    if (existing) Object.assign(existing, { status, label: String(label) });
+    else this._state.dtcs.push({ id, status, label: String(label), origin: 'PRIMARY_MEMORY' });
+    return this.getSnapshot();
+  }
+
+  tick(ms) {
+    if (!Number.isFinite(ms) || ms < 0) throw new RangeError('tick requires finite nonnegative milliseconds.');
+    const state = this._state;
+    const pending = state.pendingOperation;
+    // S3 is paused while DCM processes a pending request, then restarted at completion.
+    let idleMs = ms;
+    if (pending) {
+      const remaining = pending.remainingMs;
+      pending.remainingMs = Math.max(0, remaining - ms);
+      idleMs = Math.max(0, ms - remaining);
+      if (pending.remainingMs === 0) {
+        state.pendingOperation = null;
+        state.flash = createFlashState(state.flash);
+        state.flash.status = 'erased';
+        state.flash.erased = true;
+        state.s3RemainingMs = this._config.s3Ms;
+        const result = positiveResult([0x71, 1, 0xff, 0, 0], '非活动分区擦除完成', '虚拟擦除定时完成，发送 NRC 78 后的最终响应。');
+        this._record({ ...result, request: pending.request, service: 'RoutineControl', outcome: 'positive', deferred: true,
+          frames: buildIsoTpExchange(pending.request, result.response, this._transport).filter((frame) => frame.phase !== 'REQUEST'),
+          before: { session: state.session, security: state.security }, atMs: state.nowMs + remaining });
+      }
+    }
+    state.nowMs += ms;
+    state.securityDelayRemainingMs = Math.max(0, state.securityDelayRemainingMs - ms);
+    if (state.security === 'delay' && state.securityDelayRemainingMs === 0) {
+      state.security = 'locked';
+      state.invalidKeyAttempts = 0;
+    }
+    if (state.session !== 'default' && !state.pendingOperation) {
+      state.s3RemainingMs = Math.max(0, state.s3RemainingMs - idleMs);
+      if (state.s3RemainingMs === 0) {
+        state.session = 'default';
+        state.sessionId = 1;
+        state.security = state.securityDelayRemainingMs > 0 ? 'delay' : 'locked';
+        state.pendingSeed = null;
+        state.s3RemainingMs = null;
+        state.flash = createFlashState(state.flash);
+      }
+    }
+    return this.getSnapshot();
   }
 
   request(input, ecuState = {}) {
@@ -329,9 +402,12 @@ export class UdsSimulator {
       });
     }
 
-    const result = this._dispatch(request);
+    if (request.length > 4095) throw new RangeError('UDS teaching request exceeds 4095 bytes.');
+    const result = this._state.pendingOperation && sid !== 0x3e
+      ? nrcResult(sid, 0x24, '等待当前异步擦除完成后再发送服务请求。') : this._dispatch(request);
+    if (this._state.session !== 'default') this._state.s3RemainingMs = this._config.s3Ms;
     const suppressed = result.suppressed === true;
-    const frames = buildIsoTpExchange(request, suppressed ? [] : result.response);
+    const frames = buildIsoTpExchange(request, suppressed ? [] : result.response, this._transport);
     return this._record({
       request,
       response: suppressed ? [] : result.response,
@@ -393,7 +469,8 @@ export class UdsSimulator {
     if (!session) return nrcResult(0x10, 0x12, '只配置了 default(01)、programming(02) 和 extended(03)。');
     this._state.session = session.key;
     this._state.sessionId = session.id;
-    this._state.security = 'locked';
+    this._state.s3RemainingMs = session.id === 1 ? null : this._config.s3Ms;
+    this._state.security = this._state.securityDelayRemainingMs > 0 ? 'delay' : 'locked';
     this._state.pendingSeed = null;
     this._state.invalidKeyAttempts = 0;
     this._state.flash = createFlashState({
@@ -404,6 +481,7 @@ export class UdsSimulator {
       [0x50, subFunction, 0x00, 0x32, 0x01, 0xf4],
       `已进入${session.label}`,
       '正响应 SID=请求 SID+0x40；附带的 P2/P2* 数值是教学配置，不代表真实 ECU 标定。',
+      { suppressed: (request[1] & 0x80) !== 0 },
     );
   }
 
@@ -418,6 +496,7 @@ export class UdsSimulator {
     const result = positiveResult([0x51, subFunction], 'ECUReset 已接受', '正响应发送后，教学诊断状态回到默认会话并重新上锁。');
     this._state.session = 'default';
     this._state.sessionId = 0x01;
+    this._state.s3RemainingMs = null;
     this._state.security = 'locked';
     this._state.pendingSeed = null;
     this._state.flash = createFlashState({
@@ -454,7 +533,7 @@ export class UdsSimulator {
       return nrcResult(0x27, 0x7e, '先通过 10 03 或 10 02 进入允许 SecurityAccess 的会话。');
     }
     if (this._state.security === 'delay') {
-      return nrcResult(0x27, 0x37, '错误次数过多；真实 ECU 会按配置等待一段时间。本实验可重置诊断状态后继续。');
+      return nrcResult(0x27, 0x37, `错误次数过多，虚拟时间还需等待 ${this._state.securityDelayRemainingMs} ms。`);
     }
 
     const subFunction = request[1];
@@ -479,6 +558,7 @@ export class UdsSimulator {
         this._state.invalidKeyAttempts += 1;
         if (this._state.invalidKeyAttempts >= 3) {
           this._state.security = 'delay';
+          this._state.securityDelayRemainingMs = this._config.securityDelayMs;
           return nrcResult(0x27, 0x36, '连续三次错误 Key，进入教学延迟状态。');
         }
         return nrcResult(0x27, 0x35, `Key 不匹配；已失败 ${this._state.invalidKeyAttempts}/3 次。`);
@@ -535,6 +615,10 @@ export class UdsSimulator {
     }
     if (routineId === 0xff00) {
       if (request.length !== 4) return nrcResult(0x31, 0x13, '擦除例程不携带额外参数。');
+      if (this._config.asyncEraseMs > 0) {
+        this._state.pendingOperation = { type: 'erase', request: [...request], remainingMs: this._config.asyncEraseMs };
+        return nrcResult(0x31, 0x78, '擦除正在执行；推进虚拟时间以接收最终响应。');
+      }
       this._state.flash = createFlashState({
         activeBank: this._state.flash.activeBank,
         activeVersion: this._state.flash.activeVersion,
@@ -661,7 +745,7 @@ export class UdsSimulator {
     return positiveResult(
       [0x7e, 0x00],
       suppress ? 'TesterPresent 已接受，正响应被抑制' : 'TesterPresent 已响应',
-      '它用于维持非默认诊断会话；本实验记录刷新次数但不运行真实 S3Server 计时器。',
+      '它刷新非默认会话的 S3 倒计时；通过虚拟时间推进观察会话超时。',
       { suppressed: suppress },
     );
   }

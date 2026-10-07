@@ -4,9 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
-    <meta name="description" content="在本机探索 AUTOSAR Classic 从上电到稳态运行，并通过 UDS、CDD、多 ECU 与多核启动实验学习系统架构。" />
+    <meta name="description" content="在本机探索 AUTOSAR Classic 启动、UDS 刷写、CDD、多 ECU、CAN NM、NvM/Fee、多核 OS 与 XCP 在线标定。" />
     <title>AUTOSAR 启动实验室 · Classic Platform</title>
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/src/extended.css" />
+    <link rel="stylesheet" href="/src/vehicle.css" />
     <script type="module" src="/src/app.mjs"></script>
   </head>
   <body>
@@ -28,8 +30,25 @@
         <button id="lab-tab-startup" class="lab-switcher-tab active" role="tab" aria-selected="true" aria-controls="startup-workspace" data-lab-view="startup"><span aria-hidden="true">01</span><strong>启动流程</strong><small>42 步 · ECU 上电到 RUN</small></button>
         <button id="lab-tab-uds" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="uds-workspace" data-lab-view="uds" tabindex="-1"><span aria-hidden="true">02</span><strong>UDS 诊断与刷写</strong><small>会话 · DTC · ISO-TP · Flash</small></button>
         <button id="lab-tab-system" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="system-workspace" data-lab-view="system" tabindex="-1"><span aria-hidden="true">03</span><strong>系统架构</strong><small>CDD · 多 ECU · 多核</small></button>
+        <button id="lab-tab-communication" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="communication-workspace" data-lab-view="communication" tabindex="-1"><span>04</span><strong>通信与网络管理</strong><small>信号 · NM · ISO-TP / FD</small></button>
+        <button id="lab-tab-storage" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="storage-workspace" data-lab-view="storage" tabindex="-1"><span>05</span><strong>存储实验室</strong><small>NvM · Fee · 掉电恢复</small></button>
+        <button id="lab-tab-scheduler" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="scheduler-workspace" data-lab-view="scheduler" tabindex="-1"><span>06</span><strong>OS 与多核调度</strong><small>抢占 · IRQ · IOC · 锁</small></button>
+        <button id="lab-tab-calibration" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="calibration-workspace" data-lab-view="calibration" tabindex="-1"><span>07</span><strong>XCP 在线标定</strong><small>DAQ · 参数 · 控制响应</small></button>
         <div class="lab-switcher-note"><span>LEARNING WORKSPACE</span><strong id="lab-current-title">启动流程实验</strong></div>
       </nav>
+
+      <section class="vehicle-toolbar panel" aria-label="共享车辆实验控制">
+        <label>目标 ECU <select id="vehicle-target" aria-label="目标 ECU"><option value="gateway">Gateway</option><option value="powertrain">Powertrain</option><option value="chassis">Chassis</option><option value="body">Body</option></select></label>
+        <button class="button" id="vehicle-start-all">全部 ECU 上电到 RUN</button>
+        <button class="button" id="vehicle-power">关闭目标 ECU</button>
+        <button class="button" id="vehicle-reset">复位目标</button>
+        <button class="button primary" id="vehicle-play">▶ 运行系统</button>
+        <button class="button" id="vehicle-step">+ 100 ms</button>
+        <span>共享时钟 <strong id="vehicle-time">0</strong> ms</span>
+        <label><input type="checkbox" id="vehicle-fd" /> CAN FD 诊断</label>
+        <label><input type="checkbox" id="vehicle-keepalive" /> 自动 3E（2 s）</label>
+        <span id="vehicle-status" role="status">Gateway · 等待启动</span>
+      </section>
 
       <section id="startup-workspace" class="lab-view active" role="tabpanel" aria-labelledby="lab-tab-startup">
       <section class="control-bar" aria-label="仿真控制">
@@ -115,10 +134,15 @@
       <section class="private-lab"><div class="uds-section-heading"><div><span class="section-label">OEM PRIVATE EXTENSIONS</span><h3>虚构私有服务实验</h3></div><span class="micro-label">不是任何真实厂商协议</span></div><div class="private-service-list"><button data-uds-request="B0 01"><span>B0 01</span><strong>读取 Boot 信息</strong><small>默认会话可读；返回分区与版本</small></button><button data-uds-request="B1 01"><span>B1 01</span><strong>读取 OEM 实时量</strong><small>需要扩展/编程会话</small></button><button data-uds-request="B2 A5 01 01"><span>B2 A5 01 01</span><strong>控制 OEM 特性</strong><small>需要会话、安全解锁与项目令牌</small></button></div><p>这些 SID、字段和令牌由本项目虚构，用来练习“自定义语义仍必须经过 DCM 的长度、会话、安全和范围检查”。</p></section>
       <section class="uds-learning"><div class="uds-section-heading"><div><span class="section-label">GUIDED PATH</span><h3>四步建立诊断直觉</h3></div><span class="micro-label" id="uds-goal-count">0 / 4 完成</span></div><div class="uds-goal-list"><button data-uds-goal="vin" data-uds-request="22 F1 90"><span>01</span><strong>读取 VIN</strong><small>认识 SID、DID 和多帧响应</small></button><button data-uds-goal="session" data-uds-request="10 03"><span>02</span><strong>进入扩展会话</strong><small>理解服务与会话权限</small></button><button data-uds-goal="security" data-uds-request="27 01"><span>03</span><strong>完成 Seed / Key</strong><small>观察请求顺序与 NRC</small></button><button data-uds-goal="dtc" data-uds-request="19 02 FF"><span>04</span><strong>读取并理解 DTC</strong><small>区分 DTC 号与状态字节</small></button></div></section>
       <section class="uds-history-panel"><div class="uds-section-heading"><div><span class="section-label">TRANSACTION HISTORY</span><h3>诊断事务记录</h3></div><span class="micro-label">最近 40 条</span></div><div class="uds-history" id="uds-history"><div class="uds-history-empty">尚无事务。负响应也值得记录：它告诉你前置条件缺在哪里。</div></div></section>
-      <div class="uds-boundary"><strong>学习边界：</strong>SecurityAccess 使用可公开观察的玩具算法；刷写只改变浏览器内存中的教学分区，不实现真实 Flash 驱动、签名信任链、防回滚、DoIP、真实 P2/S3 定时或量产 DCM 配置。语义参考 <a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_DiagnosticCommunicationManager.pdf" target="_blank" rel="noreferrer">AUTOSAR DCM R24-11 ↗</a> 与 <a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_CANTransportLayer.pdf" target="_blank" rel="noreferrer">CanTp R24-11 ↗</a>。</div>
+      <div class="uds-boundary"><strong>学习边界：</strong>SecurityAccess 使用可公开观察的玩具算法；刷写只改变浏览器内存中的教学分区。S3、安全延迟、NRC 78 与 ISO-TP 时序是可确定回放的教学模型，不等同于真实 P2/P2*、Flash 驱动、签名信任链、防回滚、DoIP 或量产 DCM 配置。语义参考 <a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_DiagnosticCommunicationManager.pdf" target="_blank" rel="noreferrer">AUTOSAR DCM R24-11 ↗</a> 与 <a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_CANTransportLayer.pdf" target="_blank" rel="noreferrer">CanTp R24-11 ↗</a>。</div>
     </div></section>
 
       <section id="system-workspace" class="system-dialog system-workspace lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-system" hidden><div class="dialog-heading workspace-heading"><div><span class="eyebrow">SYSTEM ARCHITECTURE LAB · CDD / MULTI-ECU / MULTI-CORE</span><h2>从一个 ECU，走向完整系统。</h2><p>保留当前单 ECU、单核的 42 步基线，在独立实验中观察实例边界、依赖、并行启动与故障门控。</p></div></div><div id="system-lab-body" class="system-lab-body"></div></section>
+
+      <section id="communication-workspace" class="lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-communication" hidden><div id="communication-content"></div></section>
+      <section id="storage-workspace" class="lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-storage" hidden><div id="storage-content"></div></section>
+      <section id="scheduler-workspace" class="lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-scheduler" hidden><div id="scheduler-content"></div></section>
+      <section id="calibration-workspace" class="lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-calibration" hidden><div id="calibration-content"></div></section>
 
       <footer class="app-footer"><span><span class="status-dot"></span> OFFLINE READY <span class="footer-divider">/</span> 零依赖 · 所有仿真数据留在本机</span><span>教学行为模型，不替代量产 BSW、MCAL 或真实 ECU <button id="sources-open">查看边界与来源 ↗</button></span></footer>
     </div>
@@ -134,7 +158,7 @@
       <section class="guide-intro"><span class="guide-number">02</span><div><h3>在边界处停下来</h3><p>在下一步设置断点，或在步骤目录中点亮红点。比较 <code>EcuM_StartupTwo()</code>、<code>BswM_Init()</code>、<code>NvM_ReadAll()</code> 和 <code>Rte_Start()</code> 前后的状态。断点在执行前生效。</p></div></section>
       <section class="guide-intro"><span class="guide-number">03</span><div><h3>故意制造一次异常</h3><p>分别尝试 PLL 不锁定、NvM 读取缓慢、NvM CRC 失败和 CAN Bus-Off。区分“无法继续启动”“延迟就绪”“使用默认数据”和“应用运行但无法通信”。切换场景会重新上电。</p></div></section>
       <section class="quiz-section"><div class="section-label">CHECK YOUR UNDERSTANDING</div><h3>一个关键问题</h3><p id="quiz-question"></p><div class="quiz-options" id="quiz-options"></div><p id="quiz-feedback" class="quiz-feedback" aria-live="polite"></p><button class="text-button" id="quiz-next">换一道题 →</button></section>
-      <section id="scope-section" class="scope-section"><div class="section-label">SCOPE & SOURCES</div><h3>你正在运行什么？</h3><p>本工具是零依赖、确定性的离散事件教学模型。参考视频的 7 阶段 / 42 步和四大观测视图，启动 API 与解释以 <strong>AUTOSAR Classic R24-11 EcuM Flexible</strong> 为基线。步骤分组、任务周期、报文、时长和错误策略属于本项目示例配置，并不是 AUTOSAR 规定的唯一实现。</p><p>它不执行 AUTOSAR C 源码、不仿真 CPU 指令、不生成 ARXML / RTE，也不连接物理 CAN。STARTUP I / II 和 RUN 是方便与视频对照的教学阶段标签；不是声称现代 Flexible 内置了旧版 Fixed 的完整 RUN / POST-RUN 状态机。</p><ul class="source-list"><li><a href="https://www.bilibili.com/video/BV1duM16GELm/" target="_blank" rel="noreferrer">视频参考：沉璧浮光《我把 AUTOSAR 启动流程做成了动画》 ↗</a></li><li><a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_ECUStateManager.pdf" target="_blank" rel="noreferrer">AUTOSAR R24-11 · ECU State Manager ↗</a></li><li><a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_EXP_ModeManagementGuide.pdf" target="_blank" rel="noreferrer">AUTOSAR R24-11 · Mode Management Guide ↗</a></li><li><a href="/docs/learning-guide.md" target="_blank">本地详细学习手册 ↗</a></li></ul><p class="reference-note">复现依据：公开视频介绍、首帧和每 5 秒预览图。未获得原作者源码，未声称逐像素或逐 API 一致；这是独立编写的学习实现。</p></section>
+      <section id="scope-section" class="scope-section"><div class="section-label">SCOPE & SOURCES</div><h3>你正在运行什么？</h3><p>本工具是零依赖、确定性的离散事件教学模型，启动 API 与解释以 <strong>AUTOSAR Classic R24-11 EcuM Flexible</strong> 为固定技术基线。7 个阶段、42 个步骤、任务周期、报文、时长和错误策略属于本项目教学配置，并不是 AUTOSAR 规定的唯一实现。</p><p>它不执行 AUTOSAR C 源码、不仿真 CPU 指令、不生成 ARXML / RTE，也不连接物理 CAN。STARTUP I / II 和 RUN 是便于理解控制权交接的教学阶段标签；不代表现代 Flexible 内置旧版 Fixed 的完整 RUN / POST-RUN 状态机。</p><ul class="source-list"><li><a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_ECUStateManager.pdf" target="_blank" rel="noreferrer">AUTOSAR R24-11 · ECU State Manager ↗</a></li><li><a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_EXP_ModeManagementGuide.pdf" target="_blank" rel="noreferrer">AUTOSAR R24-11 · Mode Management Guide ↗</a></li><li><a href="/docs/learning-guide.md" target="_blank">本地详细学习手册 ↗</a></li></ul><p class="reference-note">这是独立编写的学习实现。具体项目应结合所选 MCU、BSW 供应商、OS、配置工具和 OEM 约束核对。</p></section>
       <section class="shortcut-section"><h3>让探索更顺手</h3><span><kbd>Space</kbd> 播放 / 暂停</span><span><kbd>→</kbd> 单步</span><span><kbd>←</kbd> 回退</span><span><kbd>B</kbd> 下一步断点</span><span><kbd>R</kbd> 重新上电</span><span><kbd>Esc</kbd> 关闭弹窗</span></section>
     </div></dialog>
     <noscript><p class="noscript-message">本地仿真需要启用 JavaScript。无需联网或安装任何浏览器扩展。</p></noscript>

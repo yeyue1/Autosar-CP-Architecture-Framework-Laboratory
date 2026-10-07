@@ -22,7 +22,7 @@
 | [Memory Abstraction Interface SWS][memif] | R24-11；§8.3.1–8.3.8 | MemIf 提供访问、状态查询等接口，没有标准 `MemIf_Init` API |
 | [Diagnostic Event Manager SWS][dem] | R24-11；§7.11.5，印刷页 236–237；§8.3.3.29 | Dem 可配置成 RAM-only；使用持久块前须检查其有效性与完整性；事件报告 API `Dem_SetEventStatus` |
 | [Diagnostic Communication Manager SWS][dcm] | R24-11；诊断会话、安全级别、服务处理；§7.4.2.19–7.4.2.22 的 `0x34/0x36/0x37` | DCM 位于诊断协议处理边界；TransferData 依赖先前的 RequestDownload/Upload；服务与刷写条件取决于项目配置 |
-| [CAN Transport Layer SWS][cantp] | R24-11；CAN N-SDU 传输、分段、流控与重组 | 经典 CAN 上诊断长消息的 SF/FF/FC/CF 分帧概念；本实验只呈现确定性的正常交换 |
+| [CAN Transport Layer SWS][cantp] | R24-11；CAN N-SDU 传输、分段、流控与重组 | 诊断长消息的 SF/FF/FC/CF 分帧概念；扩展传输台对照 Classic CAN / CAN FD，并演示流控、超时与错误序号 |
 | [Watchdog Driver SWS][wdg] | R24-11；§8.3.1–8.3.4、§9.1 | 标准对外 API 包括 `Wdg_SetTriggerCondition`，不能将旧 `Wdg_Trigger` 当成本基线的接口 |
 | [CDD Design and Integration Guideline][cdd-guide] | R24-11；§6.2–6.3 | CDD 的关键资源保护、EcuM/BswM 模式管理、Det/Dem 错误上报与建议文件结构 |
 | [Operating System SWS][os] | R24-11；§7.9 多核 OS；IOC、Spinlock、OS-Application | 多核 OS 的每核运行数据、跨 OS-Application 通信和共享资源保护概念 |
@@ -39,7 +39,7 @@
 
 ## 本项目没有模拟的内容
 
-没有 CPU 指令执行、真实 MCU 寄存器、真实 AUTOSAR OS、商业 RTE/BSW/MCAL、真实 CAN 线电平及总线仲裁、硬件启动时延或安全机制认证。UDS 实验台不实现真实 P2/P2*/S3 计时、DoIP、Flash 驱动、签名信任链、防回滚、量产密钥或 DCM 配置生成；“刷写”只改变浏览器内存中的教学分区。画面中的延迟、任务、内存、报文、DID、DTC、Seed/Key、固件和状态值都是教学模型；教学的 7 阶段 / 42 步不是 AUTOSAR 规定的固定数量。
+没有 CPU 指令执行、真实 MCU 寄存器、真实 AUTOSAR OS、商业 RTE/BSW/MCAL、真实 CAN 线电平及总线仲裁、硬件启动时延或安全机制认证。UDS 实验台实现的是可确定推进的 S3、安全延迟、NRC 78 和 ISO-TP 教学时间模型，不是量产 ECU 的真实 P2/P2* 调度；也不实现 DoIP、Flash 驱动、签名信任链、防回滚、量产密钥或 DCM 配置生成。“刷写”只改变浏览器内存中的教学分区。画面中的延迟、任务、内存、报文、DID、DTC、Seed/Key、固件和状态值都是教学模型；教学的 7 阶段 / 42 步不是 AUTOSAR 规定的固定数量。
 
 项目的严格依赖检查用于帮助学习，不应替代真实 ECU 的集成验证。查看[学习指南](learning-guide.md)了解如何区分规范约束与本示例的策略。
 

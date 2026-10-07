@@ -1,9 +1,10 @@
-import { BootSimulator } from './engine.mjs';
+import { VehicleSimulator } from './vehicle.mjs';
+import { ExtendedLabUi } from './extended-ui.mjs';
 import { PHASES, MODULES, STEPS, SCENARIOS, TASKS } from './model.mjs';
 import { LabPlayer } from './player.mjs';
 import { getModuleGuide } from './module-guide.mjs';
 import { SYSTEM_LAB_PROFILES, SystemArchitectureSimulator } from './system-lab.mjs';
-import { UdsSimulator, UDS_SERVICES, UDS_FLASH_PROFILES, buildFlashRequestPlan, deriveTeachingKey, formatHex } from './uds.mjs';
+import { UDS_SERVICES, UDS_FLASH_PROFILES, buildFlashRequestPlan, deriveTeachingKey, formatHex } from './uds.mjs';
 
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, character => ({
@@ -11,14 +12,21 @@ const escape = value => String(value ?? '').replace(/[&<>"']/g, character => ({
 })[character]);
 const padded = value => String(value).padStart(2, '0');
 const number = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-const engine = new BootSimulator();
-const player = new LabPlayer(engine);
-const uds = new UdsSimulator();
+const vehicle = new VehicleSimulator();
+const players = new Map(Object.values(vehicle.ecus).map(ecu => [ecu.id, new LabPlayer(ecu.boot)]));
+let engine = vehicle.ecu().boot;
+let player = players.get(vehicle.selectedId);
+let uds = vehicle.ecu().uds;
 const systemLab = new SystemArchitectureSimulator();
 let state = engine.getSnapshot();
 let udsState = uds.getSnapshot();
 let systemLabState = systemLab.getSnapshot();
-const udsGoals = new Set();
+let udsGoals = new Set();
+const diagnosticViews = new Map();
+let vehiclePlaying = false;
+let pendingFlash = null;
+let automaticFlash = false;
+let flashClockStarted = false;
 let flashPlan = null;
 let flashCursor = 0;
 let flashRunLog = [];
@@ -34,6 +42,20 @@ let noticeTimer;
 let lastUpdate = performance.now();
 let quizIndex = 0;
 const welcomeMarkup = $('inspector-content').innerHTML;
+const liveSystem = document.createElement('div');
+liveSystem.id = 'live-system-content';
+$('system-workspace').prepend(liveSystem);
+const udsTiming = document.createElement('p');
+udsTiming.id = 'uds-timing';
+udsTiming.className = 'vehicle-timing';
+$('uds-workspace').prepend(udsTiming);
+const extendedUi = new ExtendedLabUi({
+  world: vehicle,
+  advance: advanceVehicle,
+  onChange: renderVehicle,
+  notify,
+  actions: { powerOff: powerOffVehicle, powerOn: powerOnVehicle, startAll: startAllVehicles },
+});
 const moduleElements = new Map();
 const phaseRanges = new Map(PHASES.map(phase => {
   const ids = STEPS.filter(step => step.phase === phase.id).map(step => step.id);
@@ -214,6 +236,10 @@ const workspaceConfig = {
   startup: { panel: 'startup-workspace', tab: 'lab-tab-startup', title: '启动流程实验' },
   uds: { panel: 'uds-workspace', tab: 'lab-tab-uds', title: 'UDS 诊断与刷写实验' },
   system: { panel: 'system-workspace', tab: 'lab-tab-system', title: '系统架构实验' },
+  communication: { panel: 'communication-workspace', tab: 'lab-tab-communication', title: '通信与网络管理' },
+  storage: { panel: 'storage-workspace', tab: 'lab-tab-storage', title: '存储实验室' },
+  scheduler: { panel: 'scheduler-workspace', tab: 'lab-tab-scheduler', title: 'OS 与多核调度' },
+  calibration: { panel: 'calibration-workspace', tab: 'lab-tab-calibration', title: 'XCP 在线标定' },
 };
 
 function prepareLabWorkspaces() {
@@ -252,9 +278,137 @@ function switchWorkspace(workspaceId, systemProfileId = null) {
   } else if (workspaceId === 'uds') {
     render();
     renderUds();
-  } else {
+  } else if (workspaceId === 'system') {
     renderSystemLab();
     $('system-lab-body').scrollTop = 0;
+  }
+  renderVehicle();
+}
+
+function selectVehicle(id) {
+  const currentId = Object.values(vehicle.ecus).find(ecu => ecu.boot === engine)?.id;
+  if (currentId === id && vehicle.selectedId === id) return;
+  player.pause();
+  // Leaving a target cancels only the automatic continuation. Keep the
+  // pending ECU operation so it can be inspected or advanced manually later.
+  if (flashClockStarted) {
+    automaticFlash = false;
+    stopAutomaticFlashClock();
+  }
+  if (currentId) diagnosticViews.set(currentId, { udsGoals, flashPlan, flashCursor, flashRunLog, pendingFlash, automaticFlash, flashClockStarted });
+  vehicle.select(id);
+  engine = vehicle.ecu().boot;
+  uds = vehicle.ecu().uds;
+  player = players.get(id);
+  const saved = diagnosticViews.get(id);
+  udsGoals = saved?.udsGoals ?? new Set();
+  flashPlan = saved?.flashPlan ?? null;
+  flashCursor = saved?.flashCursor ?? 0;
+  flashRunLog = saved?.flashRunLog ?? [];
+  pendingFlash = saved?.pendingFlash ?? null;
+  automaticFlash = saved?.automaticFlash ?? false;
+  flashClockStarted = saved?.flashClockStarted ?? false;
+  logSignature = ''; inspectorSignature = ''; selectedModule = null;
+  if (pendingFlash && !uds.getSnapshot().pendingOperation) finishPendingFlash();
+  render();
+}
+
+function activeVehicleId() {
+  return Object.values(vehicle.ecus).find(ecu => ecu.boot === engine)?.id ?? vehicle.selectedId;
+}
+
+function discardDiagnosticRuntime(id) {
+  diagnosticViews.delete(id);
+  if (activeVehicleId() !== id) return;
+  udsGoals.clear();
+  resetFlashUi();
+}
+
+function powerOffVehicle(id = vehicle.selectedId) {
+  if (activeVehicleId() === id) player.pause();
+  discardDiagnosticRuntime(id);
+  vehicle.powerOff(id);
+}
+
+function powerOnVehicle(id = vehicle.selectedId) {
+  if (activeVehicleId() === id) player.pause();
+  discardDiagnosticRuntime(id);
+  vehicle.start(id);
+}
+
+function resetVehicle(id = vehicle.selectedId) {
+  if (activeVehicleId() === id) player.pause();
+  discardDiagnosticRuntime(id);
+  vehicle.resetEcu(id);
+}
+
+function startAllVehicles() {
+  player.pause();
+  resetFlashUi();
+  udsGoals.clear();
+  diagnosticViews.clear();
+  vehicle.startAll();
+}
+
+function prepareStartupLifecycle() {
+  const id = vehicle.selectedId;
+  powerOffVehicle(id);
+  // Power is present, but EcuM/BSW/NM remain stopped until the startup player
+  // reaches their real boot steps. The preceding powerOff is the common reset
+  // boundary for UDS, NvM jobs, XCP, CDD and NM.
+  const ecu = vehicle.ecu(id);
+  ecu.powered = true;
+  ecu.storage.powerOn();
+  vehicle.event(id, 'POWER', '上电：等待启动实验推进 Boot 生命周期');
+}
+
+function syncSelectedRuntimeWithBoot() {
+  const ecu = vehicle.ecu();
+  const boot = engine.getSnapshot();
+  if (!ecu.powered || boot.status !== 'running') return;
+  // Vehicle owns the RUN edge, including NvM restore and initial NM request.
+  // Re-rendering must preserve subsequent NetworkRelease and RAM calibration.
+  vehicle.diagnosticState(ecu.id);
+}
+
+function renderVehicle() {
+  // Live-system cards update the world first; adopt that selection in the legacy views.
+  if (engine !== vehicle.ecu().boot) {
+    selectVehicle(vehicle.selectedId);
+    return;
+  }
+  const ecu = vehicle.ecu();
+  syncSelectedRuntimeWithBoot();
+  $('vehicle-target').value = vehicle.selectedId;
+  $('vehicle-time').textContent = vehicle.nowMs.toFixed(0);
+  $('vehicle-play').textContent = vehiclePlaying ? 'Ⅱ 暂停系统' : '▶ 运行系统';
+  $('vehicle-fd').checked = ecu.canFd;
+  $('vehicle-keepalive').checked = ecu.autoTester;
+  $('vehicle-power').textContent = ecu.powered ? '关闭目标 ECU' : '上电目标 ECU';
+  $('vehicle-status').textContent = `${ecu.name} · ${ecu.powered ? ecu.busOff ? 'BUS-OFF' : ecu.nm : 'OFF'} · 本地实例状态跨工作区共享`;
+  renderUds();
+  extendedUi.render(activeWorkspace);
+}
+
+function advanceVehicle(ms) {
+  vehicle.tick(ms);
+  extendedUi.tick(ms);
+  finishPendingFlash();
+  renderVehicle();
+}
+
+function sendDiagnostic(input) { return vehicle.request(input); }
+
+function finishPendingFlash() {
+  if (!pendingFlash) return;
+  const latest = uds.getSnapshot().history.find(entry => entry.deferred && entry.id > pendingFlash.transactionId);
+  if (latest?.deferred && latest.id > pendingFlash.transactionId) {
+    recordFlashStep(`${pendingFlash.label} · 最终响应`, latest);
+    pendingFlash = null;
+    if (latest.positive) { flashCursor += 1; if (automaticFlash) autoFlash(); }
+    else { automaticFlash = false; stopAutomaticFlashClock(); }
+  } else if (!uds.getSnapshot().pendingOperation) {
+    pendingFlash = null; automaticFlash = false; stopAutomaticFlashClock();
   }
 }
 
@@ -501,11 +655,13 @@ function renderDirectory() {
 }
 
 function udsLink() {
-  const dcmReady = ['ready', 'active'].includes(state.modules?.dcm);
-  const canReady = state.can?.actual === 'FULL_COM' && state.can?.txEnabled === true;
+  const diagnosticState = vehicle.diagnosticState();
+  const dcmReady = ['ready', 'active'].includes(diagnosticState.modules?.dcm);
+  const canReady = diagnosticState.can?.actual === 'FULL_COM' && diagnosticState.can?.txEnabled === true;
   if (!dcmReady) return { available: false, label: 'DCM 未就绪', detail: '运行到第 28 步以后' };
-  if (!canReady) return { available: false, label: 'CAN 链路不可用', detail: `actual=${state.can?.actual ?? 'UNAVAILABLE'}` };
-  return { available: true, label: 'ONLINE · 7E0 / 7E8', detail: 'DCM + CanTp + CAN 已就绪' };
+  if (!canReady) return { available: false, label: 'CAN / 网关链路不可用', detail: `actual=${diagnosticState.can?.actual ?? 'UNAVAILABLE'}` };
+  const ecu = vehicle.ecu();
+  return { available: true, label: `ONLINE · ${ecu.requestId.toString(16).toUpperCase()} / ${ecu.responseId.toString(16).toUpperCase()}`, detail: `${ecu.name} · DCM + CanTp + CAN 已就绪` };
 }
 
 function markUdsGoals(transaction) {
@@ -527,9 +683,23 @@ function renderFlashProfileMeta() {
 }
 
 function resetFlashUi() {
+  stopAutomaticFlashClock();
+  pendingFlash = null;
+  automaticFlash = false;
   flashPlan = null;
   flashCursor = 0;
   flashRunLog = [];
+}
+
+function stopAutomaticFlashClock() {
+  if (!flashClockStarted) return;
+  vehiclePlaying = false;
+  flashClockStarted = false;
+}
+
+function startAutomaticFlashClock() {
+  if (!vehiclePlaying) flashClockStarted = true;
+  if (flashClockStarted) vehiclePlaying = true;
 }
 
 function recordFlashStep(label, transaction) {
@@ -562,8 +732,8 @@ function renderFlash() {
     : flash.status === 'activated' ? `活动分区 ${flash.activeBank} · ${flash.activeVersion}`
       : flashPlan ? '计划已执行完毕。' : '刷写仅修改浏览器内存中的教学状态。';
   $('flash-prepare').disabled = !link.available;
-  $('flash-next').disabled = !link.available || !next;
-  $('flash-auto').disabled = !link.available;
+  $('flash-next').disabled = !link.available || !next || Boolean(pendingFlash);
+  $('flash-auto').disabled = !link.available || Boolean(pendingFlash);
   $('flash-profile-select').disabled = flashPlan && flashCursor < flashPlan.requests.length;
   $('flash-step-log').innerHTML = flashRunLog.length ? flashRunLog.map((entry, index) => {
     const transaction = entry.transaction;
@@ -579,13 +749,14 @@ function prepareFlash() {
   flashPlan = buildFlashRequestPlan(profile.id);
   flashCursor = 0;
   flashRunLog = [];
-  const session = uds.request('10 02', state);
+  pendingFlash = null; automaticFlash = false;
+  const session = sendDiagnostic('10 02');
   recordFlashStep('进入编程会话', session);
   if (!session.positive) { renderUds(); return false; }
-  const seed = uds.request('27 01', state);
+  const seed = sendDiagnostic('27 01');
   recordFlashStep('请求 SecurityAccess Seed', seed);
   if (!seed.positive) { renderUds(); return false; }
-  const key = uds.request([0x27, 0x02, ...deriveTeachingKey(seed.response.slice(2))], state);
+  const key = sendDiagnostic([0x27, 0x02, ...deriveTeachingKey(seed.response.slice(2))]);
   recordFlashStep('发送教学 Key', key);
   udsState = uds.getSnapshot();
   markUdsGoals(key);
@@ -598,9 +769,15 @@ function prepareFlash() {
 function runFlashStep() {
   const item = flashPlan?.requests[flashCursor];
   if (!item) return false;
-  const transaction = uds.request(item.request, state);
+  const transaction = sendDiagnostic(item.request);
   $('uds-request-input').value = formatHex(item.request);
   recordFlashStep(item.label, transaction);
+  if (transaction.nrc === 0x78) {
+    pendingFlash = { label: item.label, transactionId: transaction.id };
+    renderUds();
+    notify('擦除处理中：NRC 78。推进共享时钟 250 ms 或运行系统，等待最终响应。');
+    return false;
+  }
   if (transaction.positive) flashCursor += 1;
   renderUds();
   if (!transaction.positive) notify(`${transaction.summary}：${transaction.explanation}`, true);
@@ -611,22 +788,33 @@ function runFlashStep() {
 
 function autoFlash() {
   if ((!flashPlan || flashCursor >= flashPlan.requests.length) && !prepareFlash()) return;
+  automaticFlash = true;
   let failure = null;
   while (flashCursor < flashPlan.requests.length) {
     const item = flashPlan.requests[flashCursor];
-    const transaction = uds.request(item.request, state);
+    const transaction = sendDiagnostic(item.request);
     $('uds-request-input').value = formatHex(item.request);
     recordFlashStep(item.label, transaction);
+    if (transaction.nrc === 0x78) {
+      pendingFlash = { label: item.label, transactionId: transaction.id };
+      startAutomaticFlashClock();
+      renderUds();
+      notify('自动刷写正在等待异步擦除；共享时钟将继续推进。');
+      return;
+    }
     if (!transaction.positive) { failure = transaction; break; }
     flashCursor += 1;
   }
   renderUds();
+  automaticFlash = false;
+  stopAutomaticFlashClock();
   if (failure) notify(`${failure.summary}：${failure.explanation}`, true);
   else notify(`教学刷写完成：活动分区 ${udsState.flash.activeBank} · ${udsState.flash.activeVersion}`);
 }
 
 function renderUds() {
   udsState = uds.getSnapshot();
+  $('uds-timing').textContent = `${vehicle.ecu().name} · S3 ${udsState.s3RemainingMs ?? 0} ms · 安全延迟 ${udsState.securityDelayRemainingMs ?? 0} ms · ${udsState.pendingOperation ? `NRC 78 等待 ${udsState.pendingOperation.remainingMs} ms` : '无待完成服务'} · 时钟暂停时倒计时暂停`;
   const link = udsLink();
   $('uds-link-state').textContent = link.label;
   $('uds-link-state').title = link.detail;
@@ -669,7 +857,7 @@ function fillUdsRequest(request) {
 
 function runUdsRequest(request = $('uds-request-input').value) {
   try {
-    const transaction = uds.request(request, state);
+    const transaction = sendDiagnostic(request);
     udsState = uds.getSnapshot();
     markUdsGoals(transaction);
     renderUds();
@@ -685,6 +873,7 @@ function runUdsRequest(request = $('uds-request-input').value) {
 function render() {
   const previous = state;
   state = engine.getSnapshot();
+  syncSelectedRuntimeWithBoot();
   if (previous.status !== 'blocked' && state.status === 'blocked') notify(state.blockReason || '启动被阻塞，请检查前置条件。', true);
   renderMetrics();
   renderArchitecture();
@@ -696,19 +885,19 @@ function render() {
   if (activeWorkspace === 'system') renderSystemLab();
   if ($('steps-dialog').open) renderDirectory();
   renderUds();
+  renderVehicle();
 }
 
 function togglePlay() {
+  ensurePower();
   if (player.playing) player.pause();
   else { player.play(); lastUpdate = performance.now(); }
   render();
 }
 
 function seek(cursor) {
+  prepareStartupLifecycle();
   const result = player.seek(cursor);
-  uds.reset();
-  udsGoals.clear();
-  resetFlashUi();
   selectedModule = null;
   logSignature = '';
   if (result.cursor < cursor) notify(`当前场景在第 ${result.cursor} 步阻塞，不能越过未满足的前置条件。`, true);
@@ -716,14 +905,17 @@ function seek(cursor) {
 }
 
 function reset(scenario) {
+  prepareStartupLifecycle();
   player.reset(scenario);
-  uds.reset();
-  udsGoals.clear();
-  resetFlashUi();
   selectedModule = null;
   logSignature = '';
   inspectorSignature = '';
   render();
+}
+
+function ensurePower() {
+  const ecu = vehicle.ecu();
+  if (!ecu.powered) { ecu.powered = true; ecu.storage.powerOn(); }
 }
 
 function toggleBreakpoint(id) {
@@ -758,6 +950,7 @@ function exportTrace() {
     format: 'autosar-startup-lab/1', profile: 'AUTOSAR Classic R24-11 Flexible educational example',
     disclaimer: 'Deterministic teaching data, not a real ECU trace or AUTOSAR conformance claim.',
     breakpoints: [...player.breakpoints].sort((a, b) => a - b), snapshot, uds: uds.getSnapshot(),
+    vehicle: vehicle.getSnapshot(), storage: vehicle.ecu().storage.getSnapshot(), scheduler: vehicle.os.getSnapshot(), calibration: vehicle.ecu().xcp.getSnapshot(),
   };
   const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
   const link = document.createElement('a');
@@ -791,6 +984,14 @@ function renderQuiz() {
 }
 
 function bindEvents() {
+  $('vehicle-target').addEventListener('change', event => selectVehicle(event.target.value));
+  $('vehicle-start-all').addEventListener('click', () => { startAllVehicles(); render(); });
+  $('vehicle-power').addEventListener('click', () => { if (vehicle.ecu().powered) powerOffVehicle(); else powerOnVehicle(); render(); });
+  $('vehicle-reset').addEventListener('click', () => { resetVehicle(); render(); });
+  $('vehicle-play').addEventListener('click', () => { vehiclePlaying = !vehiclePlaying; player.pause(); renderVehicle(); });
+  $('vehicle-step').addEventListener('click', () => { player.pause(); advanceVehicle(100); });
+  $('vehicle-fd').addEventListener('change', event => { vehicle.setCanFd(event.target.checked); renderVehicle(); });
+  $('vehicle-keepalive').addEventListener('change', event => { vehicle.ecu().autoTester = event.target.checked; vehicle.ecu().nextTester = vehicle.nowMs + 2000; renderVehicle(); });
   $('lab-switcher').addEventListener('click', event => {
     const tab = event.target.closest('[data-lab-view]');
     if (tab) switchWorkspace(tab.dataset.labView);
@@ -805,7 +1006,7 @@ function bindEvents() {
     tabs[next].focus();
   });
   $('play-button').addEventListener('click', togglePlay);
-  $('step-button').addEventListener('click', () => { player.step(); selectedModule = null; render(); });
+  $('step-button').addEventListener('click', () => { ensurePower(); const running = engine.getSnapshot().status === 'running'; player.step(); if (running) advanceVehicle(10); selectedModule = null; render(); });
   $('previous-button').addEventListener('click', () => seek(Math.max(0, state.cursor - 1)));
   $('reset-button').addEventListener('click', () => reset(state.scenario));
   $('speed-select').addEventListener('change', event => player.setSpeed(Number(event.target.value)));
@@ -895,7 +1096,7 @@ function bindEvents() {
     if (!udsState.pendingSeed) return;
     fillUdsRequest(`27 02 ${formatHex(deriveTeachingKey(udsState.pendingSeed))}`);
   });
-  $('uds-reset').addEventListener('click', () => { uds.reset(); resetFlashUi(); renderUds(); notify('诊断会话、安全状态、刷写分区和示例 DTC 已重置。'); });
+  $('uds-reset').addEventListener('click', () => { uds.reset(); resetFlashUi(); renderUds(); notify('诊断会话、安全状态和示例 DTC 已重置；当前活动固件版本保留。'); });
   $('flash-profile-select').addEventListener('change', () => { resetFlashUi(); renderUds(); });
   $('flash-prepare').addEventListener('click', prepareFlash);
   $('flash-next').addEventListener('click', runFlashStep);
@@ -918,7 +1119,7 @@ function bindEvents() {
     if (activeWorkspace !== 'startup' || event.ctrlKey || event.metaKey || event.altKey || document.querySelector('dialog[open]')) return;
     if (event.target.closest('input,select,textarea,button,a,[contenteditable="true"]')) return;
     if (event.code === 'Space') { event.preventDefault(); togglePlay(); }
-    else if (event.key === 'ArrowRight') { event.preventDefault(); player.step(); selectedModule = null; render(); }
+    else if (event.key === 'ArrowRight') { event.preventDefault(); $('step-button').click(); }
     else if (event.key === 'ArrowLeft') { event.preventDefault(); seek(Math.max(0, state.cursor - 1)); }
     else if (event.key.toLowerCase() === 'r') reset(state.scenario);
     else if (event.key.toLowerCase() === 'b' && state.cursor < STEPS.length) toggleBreakpoint(state.cursor + 1);
@@ -937,8 +1138,12 @@ setInterval(() => {
   const now = performance.now();
   const elapsed = Math.min(250, Math.max(0, now - lastUpdate));
   lastUpdate = now;
-  if (!player.playing || document.hidden) return;
+  if (document.hidden) return;
+  if (vehiclePlaying && !player.playing) advanceVehicle(elapsed);
+  if (!player.playing) return;
+  const wasRunning = engine.getSnapshot().status === 'running';
   const result = player.advance(elapsed);
+  if (wasRunning && result.changed) advanceVehicle(elapsed * player.speed);
   if (result.changed || result.breakpoint) render();
   if (result.breakpoint) notify(`已在第 ${result.breakpoint} 步执行前暂停。继续播放或单步可越过此断点一次。`);
 }, 80);

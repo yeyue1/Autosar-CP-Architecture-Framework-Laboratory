@@ -1,12 +1,16 @@
 # Autosar CP Architecture Framework Laboratory
 
-一个零第三方运行时依赖、直接在本机运行的 AUTOSAR Classic Platform 交互式学习实验室。沿着 **7 个阶段、42 个教学步骤**观察控制权从硬件到 EcuM、OS、BswM，最终到 RTE 和应用的交接；再通过完整的 UDS 与系统架构工作区学习 DCM、刷写、CDD、多 ECU 协同和多核启动。
+一个零第三方运行时依赖、直接在本机运行的 AUTOSAR Classic Platform 交互式学习实验室。沿着 **7 个阶段、42 个教学步骤**观察控制权从硬件到 EcuM、OS、BswM，最终到 RTE 和应用的交接；再通过整车共享时钟继续学习 UDS、刷写、CDD、多 ECU、CAN NM、NvM/Fee、OS 多核调度和 XCP 在线标定。
 
-页面顶部提供三个同级工作区，切换时会保留各自的实验状态：
+页面顶部提供七个同级工作区。四个教学 ECU 及其诊断、存储、网络与标定状态会跨工作区保留：
 
 - **启动流程**：42 步启动动画、故障场景、断点、日志、任务调度与 CAN 报文。
 - **UDS 诊断与刷写**：会话、安全访问、DID、DTC、ISO-TP、教学刷写和虚构 OEM 私有服务。
 - **系统架构**：CDD、多 ECU、多核启动、实例所有权、同步关系和故障门控。
+- **通信与网络管理**：应用信号打包、CAN PDU、NM 休眠/唤醒状态机、共享总线记录和 ISO-TP 逐帧传输。
+- **存储实验室**：`NvM → MemIf → Fee → Fls → verify → commit` 异步流水线、CRC/写保护、掉电恢复和双扇区 GC。
+- **OS 与多核调度**：固定优先级抢占、Cat1/Cat2 中断、扩展任务事件、IOC、Spinlock、核上下线与截止时间。
+- **XCP 在线标定**：连接、DAQ、RAM 参数、控制响应曲线，以及经同一 NvM 队列实现的掉电保持。
 
 ## 环境要求
 
@@ -40,7 +44,8 @@ node server.mjs --port 4174 --open
 - 用进度条或七阶段导航确定性回放；用「步骤目录」直接定位任意一步。
 - 在下一步或任意目录项上设置**执行前断点**。暂停后继续可跨过该断点一次；手动单步不会再次卡在同一断点。
 - 查看分层架构的模块高亮、模块学习卡、中文解释和示例 C 伪代码；展开模块架构讲解器，沿启动控制、通信、诊断、存储、看门狗和 I/O 路径钻取上下游关系。
-- 通过顶层标签在 **启动流程 / UDS 诊断与刷写 / 系统架构** 三个完整工作区之间切换，切换时保留各实验状态。
+- 通过七个顶层标签在完整工作区之间切换；目标 ECU、虚拟时间和模块状态保持一致。
+- 运行 Gateway、Powertrain、Chassis、Body 四个独立 ECU 实例，切换诊断目标并观察各自的 CAN ID、会话、安全等级、DTC、存储和标定状态。
 - 在系统架构工作区切换 **CDD 深入 / 多 ECU 协同 / 多核启动**，单步或播放实例状态、依赖链、启动屏障和故障门控。
 - 同时观察 EcuM 教学阶段、OS/RTE 状态、NvM 作业与数据来源、通信请求与实际模式。
 - 筛选启动日志、查看模拟周期任务时序、应用信号及教学 CAN 报文。
@@ -48,6 +53,11 @@ node server.mjs --port 4174 --open
 - 在内置学习指南中练习异步初始化、状态门控和版本差异题目。
 - 在 UDS 实验台发送十六进制请求，学习 `0x10/0x14/0x19/0x22/0x27/0x2E/0x31/0x34/0x36/0x37/0x3E`、正负响应和 NRC。
 - 展开经典 CAN 上的 ISO-TP `SF/FF/FC/CF`，并用 Bus-Off 场景区分 UDS 负响应和传输失败。
+- 在 Classic CAN 与 CAN FD 之间切换，比较相同 UDS/ISO-TP 负载的帧数、单帧容量与流控行为；还可注入丢 FC、丢 CF 和错误序号。
+- 释放整车网络请求并推进虚拟时间，观察 `REPEAT_MESSAGE → NORMAL_OPERATION/READY_SLEEP → PREPARE_BUS_SLEEP → BUS_SLEEP`，再用网络唤醒恢复各 ECU。
+- 将 DTC、标定值放进同一套共享教学 NvM 队列，区分请求受理、Flash 写入、校验、提交与掉电恢复。
+- 在多核时间线上观察周期任务、高优先级诊断任务、Cat1/Cat2 ISR、IOC 与锁竞争。
+- 用 XCP 教学连接修改 RAM 标定、启动 10 ms DAQ 并观察传感器、滤波值和执行器输出曲线；只有 NvM 提交后的值能跨复位保留。
 - 用两份内置教学镜像练习 `RequestDownload → TransferData → RequestTransferExit → CRC32 → 双分区激活`，可单步或自动执行。
 - 试验三条完全虚构的 OEM 私有服务，观察自定义语义如何继续受会话、安全、顺序和范围检查约束。
 
@@ -75,10 +85,13 @@ node server.mjs --port 4174 --open
 2. 用断点比较 `EcuM_StartupTwo`、SchM/BswM 启动、`NvM_ReadAll`、RTE 启动时序。
 3. 对照慢读和 CRC 场景，说明「请求受理」「数据就绪」「使用默认值」的区别。
 4. 对照正常与 Bus-Off 场景，区分网络许可、请求模式和实际模式。
-5. 打开「系统架构」，比较“多个独立 ECU”和“一个 ECU 内多个核心”的所有权差异。
-6. 修改模型中的一项参数，运行自动化测试，再观察其影响。
+5. 打开「通信与网络管理」，先释放全部网络请求观察休眠，再比较 Classic CAN 与 CAN FD 的 ISO-TP 分帧。
+6. 在「存储实验室」写入参数并在不同阶段断电，找出 `commit` 前后的持久化边界。
+7. 在「OS 与多核调度」注入 Cat2 中断和锁竞争，再到「XCP 在线标定」观察参数、DAQ 与 NvM 的联动。
+8. 打开「系统架构」，比较“多个独立 ECU”和“一个 ECU 内多个核心”的所有权差异。
+9. 修改模型中的一项参数，运行自动化测试，再观察其影响。
 
-详细解释见 **[启动学习指南](docs/learning-guide.md)**、**[UDS 诊断实验指南](docs/uds-lab.md)** 和 **[CDD、多 ECU 与多核实验指南](docs/system-architecture-lab.md)**；每项重要约束的官方出处与版本差异见 **[来源与复现边界](docs/sources.md)**。
+详细解释见 **[启动学习指南](docs/learning-guide.md)**、**[UDS 诊断实验指南](docs/uds-lab.md)**、**[CDD、多 ECU 与多核实验指南](docs/system-architecture-lab.md)** 和 **[通信、存储、OS、XCP 运行期实验指南](docs/runtime-labs.md)**；每项重要约束的官方出处与版本差异见 **[来源与复现边界](docs/sources.md)**。
 
 ## 验证与命令行仿真
 
@@ -108,11 +121,17 @@ node scripts/export-trace.mjs --scenario nvm-crc --duration 250 --out .runtime/n
 | [src/model.mjs](src/model.mjs) | 七阶段、42 步的解释与伪代码、模块定义、场景、任务参数 |
 | [src/module-guide.mjs](src/module-guide.mjs) | 从模块与启动步骤派生生命周期、上下游关系和跨层软件路径 |
 | [src/system-lab.mjs](src/system-lab.mjs) | CDD、多 ECU、多核 profile 及可回放、可故障注入的独立状态机 |
+| [src/vehicle.mjs](src/vehicle.mjs) | 四 ECU 共享虚拟时钟、诊断路由、NM、应用 PDU、CDD、DTC 与跨实验状态编排 |
+| [src/storage.mjs](src/storage.mjs) | NvM/MemIf/Fee/Fls 教学流水线、提交边界、掉电恢复、CRC、写保护与 GC |
+| [src/os-lab.mjs](src/os-lab.mjs) | 多核固定优先级调度、任务、中断、IOC、Spinlock 与时间线 |
+| [src/xcp-lab.mjs](src/xcp-lab.mjs) | XCP 连接/DAQ/RAM 标定的教学状态机 |
+| [src/transport-lab.mjs](src/transport-lab.mjs) | Classic CAN / CAN FD 的 ISO-TP 逐帧、流控、STmin 与超时故障模型 |
 | [src/engine.mjs](src/engine.mjs) | 离散状态转移、故障策略、虚拟任务调度、信号与报文 |
 | [src/player.mjs](src/player.mjs) | 播放时间与 ECU 时间分离、断点、暂停和回放 |
 | [src/uds.mjs](src/uds.mjs) | UDS 会话/安全/DID/DTC、刷写/分区状态机、虚构 OEM 服务与 ISO-TP 分帧 |
-| [src/app.mjs](src/app.mjs) | DOM 交互、模块高亮、任务图、UDS 实验台和导出 |
-| [index.html](index.html) / [styles.css](styles.css) | 无框架界面和响应式布局 |
+| [src/extended-ui.mjs](src/extended-ui.mjs) | 通信、存储、调度、标定与整车实例的视图和交互 |
+| [src/app.mjs](src/app.mjs) | 七工作区编排、原有启动/UDS/架构视图和导出 |
+| [index.html](index.html) / [styles.css](styles.css) / [src/extended.css](src/extended.css) | 无框架界面和响应式布局 |
 | [server.mjs](server.mjs) | 只绑定本机地址、白名单路径的静态 HTTP 服务 |
 | [tests](tests/) | Node 内置测试，不依赖外部测试框架 |
 
@@ -123,8 +142,9 @@ node scripts/export-trace.mjs --scenario nvm-crc --duration 250 --out .runtime/n
 这是**教学级行为仿真**，不是可烧录到硬件上的 AUTOSAR 工程，也不是 CPU 指令仿真器或商业虚拟 ECU：
 
 - 不执行真实 ECU C 固件，不提供量产 BSW / MCAL / RTE 生成器，不生成 ARXML。
-- 不连接物理 CAN，没有 CAN 仲裁、真实中断、硬件寄存器或功能安全认证。
-- UDS 使用虚构 DID/DTC、公开玩具 Seed/Key、浏览器内存镜像和简化时间语义，不是诊断一致性测试、真实刷写器或量产安全实现。
+- 不连接物理 CAN，没有位级仲裁、误码帧、真实中断、硬件寄存器或功能安全认证；CAN FD 只模拟数据长度对 ISO-TP 分帧的影响。
+- UDS 使用虚构 DID/DTC、公开玩具 Seed/Key、浏览器内存镜像，以及可确定推进的 S3、安全延迟和 NRC 78 时间模型；它不是诊断一致性测试、真实刷写器或量产安全实现。
+- NvM/Fee、AUTOSAR OS、XCP、NM 和 CDD 都是行为教学模型，不解析 ARXML，也不替代供应商协议栈和配置工具。
 - 时间、任务耗时、CPU 占用、传感器值、CAN ID 和错误策略均为示例，不是实测。
 - 多 ECU 拓扑、核分配、启动屏障和 CDD 特殊 ASIC 均为教学配置，不是可直接生成的系统描述或 OS 配置。
 - STARTUP I / II / RUN 是方便学习的阶段标签，不把现代 Flexible 冒充旧 Fixed 状态机。
