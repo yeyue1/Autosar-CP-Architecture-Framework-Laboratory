@@ -1,4 +1,5 @@
 import { TransportSimulator } from './transport-lab.mjs';
+import { updateHtml } from './dom-update.mjs';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const hex = bytes => (bytes || []).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
@@ -26,19 +27,9 @@ export class ExtendedLabUi {
     const ecu = this.world.ecu();
     const identity = `${ecu.id}:${ecu.volatileRevision}`;
     const preserveDrafts = this.draftIdentity.get(root) === identity;
-    const focused = preserveDrafts && root.contains(document.activeElement) ? document.activeElement : null;
-    const name = focused?.name;
-    const values = preserveDrafts ? [...root.querySelectorAll('input,select')].map(el => [el.name, el.value, el.checked]) : [];
     root.classList.add('ext-workspace');
-    root.innerHTML = this[methods[workspace]]();
+    updateHtml(root, this[methods[workspace]](), { preserveFormValues: preserveDrafts });
     this.draftIdentity.set(root, identity);
-    // Preserve drafts while the virtual clock updates charts and output panels.
-    for (const [key, value, checked] of values) {
-      if (!key) continue;
-      const el = root.querySelector(`[name="${key}"]`);
-      if (el) { el.value = value; if (el.type === 'checkbox') el.checked = checked; }
-    }
-    if (name) root.querySelector(`[name="${name}"]`)?.focus({ preventScroll: true });
     if (!this.bound.has(root)) {
       root.addEventListener('click', e => {
         const target = e.target.closest('[data-ext]');
