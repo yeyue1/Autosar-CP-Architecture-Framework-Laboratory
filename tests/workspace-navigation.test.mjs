@@ -7,13 +7,23 @@ const app = await readFile(new URL('../src/app.mjs', import.meta.url), 'utf8');
 const styles = await readFile(new URL('../styles.css', import.meta.url), 'utf8');
 const vehicleStyles = await readFile(new URL('../src/vehicle.css', import.meta.url), 'utf8');
 
-test('all seven learning labs are peer workspaces', () => {
-  const ids = ['startup', 'uds', 'system', 'communication', 'storage', 'scheduler', 'calibration'];
+test('all eight learning labs are peer workspaces', () => {
+  const ids = ['startup', 'uds', 'system', 'communication', 'storage', 'scheduler', 'calibration', 'knowledge'];
   for (const id of ids) {
     assert.match(index, new RegExp(`data-lab-view="${id}"`));
     assert.match(index, new RegExp(`<section id="${id}-workspace"[^>]+role="tabpanel"`));
   }
   assert.doesNotMatch(index, /<dialog id="(?:uds|system)-dialog"/);
+});
+
+test('the knowledge workspace is wired to the offline RAG service', () => {
+  assert.match(index, /<link rel="stylesheet" href="\/src\/rag\.css"/);
+  assert.match(index, /<div id="knowledge-content"><\/div>/);
+  assert.match(app, /import \{ RagWorkspaceUi \} from '\.\/rag-ui\.mjs'/);
+  assert.match(app, /import \{ createRagService \} from '\.\/rag\/loader\.mjs'/);
+  assert.match(app, /knowledge: \{ panel: 'knowledge-workspace', tab: 'lab-tab-knowledge', title: '知识库检索' \}/);
+  // The corpus is a same-origin static artifact: no CDN, no remote inference call.
+  assert.doesNotMatch(app, /https?:\/\/(?!127\.0\.0\.1|localhost)/);
 });
 
 test('workspace switching keeps one visible panel and preserves simulator instances', () => {

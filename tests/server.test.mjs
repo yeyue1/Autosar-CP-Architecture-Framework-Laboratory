@@ -11,6 +11,7 @@ async function makeFixture() {
   await mkdir(path.join(fixtureRoot, "src"), { recursive: true });
   await mkdir(path.join(fixtureRoot, "assets"), { recursive: true });
   await mkdir(path.join(fixtureRoot, "docs"), { recursive: true });
+  await mkdir(path.join(fixtureRoot, "knowledge"), { recursive: true });
   await mkdir(path.join(fixtureRoot, "tests"), { recursive: true });
 
   await writeFile(path.join(fixtureRoot, "index.html"), "<!doctype html><title>AUTOSAR</title>", "utf8");
@@ -18,6 +19,9 @@ async function makeFixture() {
   await writeFile(path.join(fixtureRoot, "src", "app.mjs"), "export const ready = true;", "utf8");
   await writeFile(path.join(fixtureRoot, "assets", "logo.svg"), "<svg xmlns='http://www.w3.org/2000/svg'></svg>", "utf8");
   await writeFile(path.join(fixtureRoot, "docs", "note.md"), "# note", "utf8");
+  await writeFile(path.join(fixtureRoot, "knowledge", "corpus.json"), '{"version":1,"documents":[]}', "utf8");
+  await writeFile(path.join(fixtureRoot, "knowledge", "01-startup.md"), "# 启动", "utf8");
+  await writeFile(path.join(fixtureRoot, "knowledge", "secret.txt"), "nope", "utf8");
   await writeFile(path.join(fixtureRoot, "tests", "secret.mjs"), "export const secret = 1;", "utf8");
 
   return fixtureRoot;
@@ -46,7 +50,8 @@ async function withServer(run) {
     const realFixtureRoot = path.resolve(fixtureRoot);
     const tempBase = path.resolve(tmpdir());
     assert.ok(realFixtureRoot.startsWith(tempBase), "fixture cleanup must stay inside tempdir");
-    await rm(realFixtureRoot, { force: true, recursive: true });
+    // Windows 上删除目录联接（junction）时 rm 可能先返回 ENOTEMPTY，重试即可。
+    await rm(realFixtureRoot, { force: true, recursive: true, maxRetries: 5, retryDelay: 50 });
   }
 }
 
@@ -113,6 +118,41 @@ test("healthz returns json", async () => {
   });
 });
 
+test("knowledge corpus is served as json and markdown is readable", async () => {
+  await withServer(async ({ url }) => {
+    const corpus = await fetch(`${url}knowledge/corpus.json`);
+    assert.equal(corpus.status, 200);
+    assert.match(corpus.headers.get("content-type") ?? "", /application\/json/);
+    assert.equal((await corpus.json()).version, 1);
+
+    const note = await fetch(`${url}knowledge/01-startup.md`);
+    assert.equal(note.status, 200);
+    assert.match(note.headers.get("content-type") ?? "", /text\/markdown/);
+
+    // 只放行 .json 与 .md：其它扩展名一律 404，避免把 knowledge/ 变成任意文件出口。
+    const blocked = await fetch(`${url}knowledge/secret.txt`);
+    assert.equal(blocked.status, 404);
+  });
+});
+
+test("knowledge route keeps traversal protection", async () => {
+  await withServer(async ({ host, port }) => {
+    const traversal = await requestRaw({
+      host,
+      path: "/knowledge/%2e%2e/server.mjs",
+      port,
+    });
+    assert.equal(traversal.statusCode, 400);
+
+    const nested = await requestRaw({
+      host,
+      path: "/knowledge/..%2fserver.mjs",
+      port,
+    });
+    assert.equal(nested.statusCode, 400);
+  });
+});
+
 test("missing and disallowed methods are rejected", async () => {
   await withServer(async ({ url }) => {
     const missing = await fetch(`${url}src/missing.mjs`);
@@ -148,11 +188,13 @@ test("encoded traversal and sensitive paths are blocked", async () => {
 test("symlink escape is blocked", async (t) => {
   await withServer(async ({ url, fixtureRoot }) => {
     const outsideDir = await mkdtemp(path.join(tmpdir(), "autosar-server-outside-"));
+    const linkPath = path.join(fixtureRoot, "src", "link");
+    let linkCreated = false;
     try {
       await writeFile(path.join(outsideDir, "escape.mjs"), "export const escaped = true;", "utf8");
-      const linkPath = path.join(fixtureRoot, "src", "link");
       try {
         await symlink(outsideDir, linkPath, "junction");
+        linkCreated = true;
       } catch (error) {
         if (error && typeof error === "object" && "code" in error && error.code === "EPERM") {
           t.skip("junction creation is not permitted in this environment");
@@ -164,10 +206,15 @@ test("symlink escape is blocked", async (t) => {
       const escaped = await fetch(`${url}src/link/escape.mjs`);
       assert.equal(escaped.status, 404);
     } finally {
+      // Windows 无法在目录联接仍存在时递归删除父目录（ENOTEMPTY），
+      // 必须先解链，再清理外部目录与夹具。
+      if (linkCreated) {
+        await rm(linkPath, { force: true, recursive: true }).catch(() => {});
+      }
       const realOutsideDir = path.resolve(outsideDir);
       const tempBase = path.resolve(tmpdir());
       assert.ok(realOutsideDir.startsWith(tempBase), "outside cleanup must stay inside tempdir");
-      await rm(realOutsideDir, { force: true, recursive: true });
+      await rm(realOutsideDir, { force: true, recursive: true, maxRetries: 5, retryDelay: 50 });
     }
   });
 });

@@ -173,6 +173,16 @@ function routeToRelativePath(pathname) {
     return { relativePath: pathname.slice(1) };
   }
 
+  // 知识库语料：只读静态资源。corpus.json 供 RAG 索引加载，.md 供「查看原文」溯源。
+  if (pathname.startsWith("/knowledge/")) {
+    const extension = path.extname(pathname);
+    if (extension !== ".json" && extension !== ".md") {
+      return { error: 404, message: "Not found." };
+    }
+
+    return { relativePath: pathname.slice(1) };
+  }
+
   return { error: 404, message: "Not found." };
 }
 

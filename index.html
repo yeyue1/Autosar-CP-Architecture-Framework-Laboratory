@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="/src/extended.css" />
     <link rel="stylesheet" href="/src/vehicle.css" />
+    <link rel="stylesheet" href="/src/rag.css" />
+    <link rel="stylesheet" href="/src/rag-reader.css" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script type="module" src="/src/app.mjs"></script>
   </head>
   <body>
@@ -34,6 +37,7 @@
         <button id="lab-tab-storage" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="storage-workspace" data-lab-view="storage" tabindex="-1"><span>05</span><strong>存储实验室</strong><small>NvM · Fee · 掉电恢复</small></button>
         <button id="lab-tab-scheduler" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="scheduler-workspace" data-lab-view="scheduler" tabindex="-1"><span>06</span><strong>OS 与多核调度</strong><small>抢占 · IRQ · IOC · 锁</small></button>
         <button id="lab-tab-calibration" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="calibration-workspace" data-lab-view="calibration" tabindex="-1"><span>07</span><strong>XCP 在线标定</strong><small>DAQ · 参数 · 控制响应</small></button>
+        <button id="lab-tab-knowledge" class="lab-switcher-tab" role="tab" aria-selected="false" aria-controls="knowledge-workspace" data-lab-view="knowledge" tabindex="-1"><span>08</span><strong>知识库检索</strong><small>语料 · BM25 · 引用溯源</small></button>
         <div class="lab-switcher-note"><span>LEARNING WORKSPACE</span><strong id="lab-current-title">启动流程实验</strong></div>
       </nav>
 
@@ -143,6 +147,9 @@
       <section id="storage-workspace" class="lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-storage" hidden><div id="storage-content"></div></section>
       <section id="scheduler-workspace" class="lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-scheduler" hidden><div id="scheduler-content"></div></section>
       <section id="calibration-workspace" class="lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-calibration" hidden><div id="calibration-content"></div></section>
+      <!-- knowledge-reader 必须与 knowledge-content 平级：后者每次渲染都会被 updateHtml 重置子节点，
+           阅读器挂进去会被下一次检索清掉。 -->
+      <section id="knowledge-workspace" class="lab-view lab-full-workspace" role="tabpanel" aria-labelledby="lab-tab-knowledge" hidden><div id="knowledge-content"></div><div id="knowledge-reader"></div></section>
 
       <footer class="app-footer"><span><span class="status-dot"></span> OFFLINE READY <span class="footer-divider">/</span> 零依赖 · 所有仿真数据留在本机</span><span>教学行为模型，不替代量产 BSW、MCAL 或真实 ECU <button id="sources-open">查看边界与来源 ↗</button></span></footer>
     </div>

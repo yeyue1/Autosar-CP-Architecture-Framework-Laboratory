@@ -191,7 +191,15 @@ async function main() {
   process.stdout.write(`${payload}\n`);
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.stack ?? error.message : String(error));
-  process.exitCode = 1;
-});
+// 仅在被直接执行时运行 CLI；被 scripts/check.mjs 动态导入做语法校验时不触发副作用。
+const isMainModule =
+  process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
+
+if (isMainModule) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.stack ?? error.message : String(error));
+    process.exitCode = 1;
+  });
+}
+
+export { main };

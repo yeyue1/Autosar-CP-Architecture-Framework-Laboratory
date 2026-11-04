@@ -1,5 +1,8 @@
 import { VehicleSimulator } from './vehicle.mjs';
 import { ExtendedLabUi } from './extended-ui.mjs';
+import { RagWorkspaceUi } from './rag-ui.mjs';
+import { ArticleReader } from './rag-reader.mjs';
+import { createRagService } from './rag/loader.mjs';
 import { updateHtml } from './dom-update.mjs';
 import { PHASES, MODULES, STEPS, SCENARIOS, TASKS } from './model.mjs';
 import { LabPlayer } from './player.mjs';
@@ -57,6 +60,20 @@ const extendedUi = new ExtendedLabUi({
   notify,
   actions: { powerOff: powerOffVehicle, powerOn: powerOnVehicle, startAll: startAllVehicles },
 });
+// Knowledge workspaces share nothing with the simulation state: the corpus is a
+// static, read-only JSON artifact. Loading is deferred until the tab is opened so
+// the startup animation keeps its first-paint budget.
+// The article reader is mounted lazily too — it only fetches a .md when the user
+// actually asks to see the source, so opening the tab costs nothing extra.
+const ragService = createRagService();
+const articleReader = new ArticleReader({ basePath: '/' });
+const ragUi = new RagWorkspaceUi({
+  service: ragService,
+  notify,
+  reader: articleReader,
+  onNavigateLab: workspaceId => { if (workspaceConfig[workspaceId]) switchWorkspace(workspaceId); },
+});
+let ragMounted = false;
 const moduleElements = new Map();
 const phaseRanges = new Map(PHASES.map(phase => {
   const ids = STEPS.filter(step => step.phase === phase.id).map(step => step.id);
@@ -241,6 +258,7 @@ const workspaceConfig = {
   storage: { panel: 'storage-workspace', tab: 'lab-tab-storage', title: '存储实验室' },
   scheduler: { panel: 'scheduler-workspace', tab: 'lab-tab-scheduler', title: 'OS 与多核调度' },
   calibration: { panel: 'calibration-workspace', tab: 'lab-tab-calibration', title: 'XCP 在线标定' },
+  knowledge: { panel: 'knowledge-workspace', tab: 'lab-tab-knowledge', title: '知识库检索' },
 };
 
 function prepareLabWorkspaces() {
@@ -282,8 +300,29 @@ function switchWorkspace(workspaceId, systemProfileId = null) {
   } else if (workspaceId === 'system') {
     renderSystemLab();
     $('system-lab-body').scrollTop = 0;
+  } else if (workspaceId === 'knowledge') {
+    renderKnowledge();
   }
   renderVehicle();
+}
+
+function renderKnowledge() {
+  const root = $('knowledge-content');
+  if (!root) return;
+  if (!ragMounted) {
+    ragUi.mount(root);
+    // 阅读器必须挂到 #knowledge-reader（与 #knowledge-content 平级），
+    // 因为 ragUi 每次渲染都会用 updateHtml 重置 #knowledge-content 的子节点，
+    // 挂在里面的面板会被下一次检索直接删掉。
+    const readerHost = $('knowledge-reader');
+    if (readerHost) articleReader.mount(readerHost);
+    ragMounted = true;
+  }
+  ragUi.render();
+  Promise.resolve(ragService.load()).then(
+    () => { if (activeWorkspace === 'knowledge') ragUi.render(); },
+    () => { if (activeWorkspace === 'knowledge') ragUi.render(); },
+  );
 }
 
 function selectVehicle(id) {

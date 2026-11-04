@@ -1,0 +1,3956 @@
+{
+  "version": 1,
+  "title": "AUTOSAR CP 知识库",
+  "generatedAt": "2026-11-04",
+  "license": "原创教学文本，语义参考 AUTOSAR R24-11 规范",
+  "categories": [
+    {
+      "id": "startup",
+      "label": "启动与 EcuM",
+      "order": 1
+    },
+    {
+      "id": "uds",
+      "label": "诊断与刷写",
+      "order": 2
+    },
+    {
+      "id": "communication",
+      "label": "通信与网络管理",
+      "order": 3
+    },
+    {
+      "id": "storage",
+      "label": "存储 NvM/Fee",
+      "order": 4
+    },
+    {
+      "id": "os",
+      "label": "OS 与多核调度",
+      "order": 5
+    },
+    {
+      "id": "xcp",
+      "label": "XCP 标定",
+      "order": 6
+    },
+    {
+      "id": "system",
+      "label": "系统架构与 CDD",
+      "order": 7
+    },
+    {
+      "id": "methodology",
+      "label": "方法论与工程实践",
+      "order": 8
+    },
+    {
+      "id": "boundary",
+      "label": "边界与常见误解",
+      "order": 9
+    }
+  ],
+  "sources": [
+    {
+      "id": "src-ecum",
+      "title": "AUTOSAR SWS ECU State Manager R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_ECUStateManager.pdf"
+    },
+    {
+      "id": "src-fixed",
+      "title": "AUTOSAR SWS ECU State Manager Fixed R4.3.1 (历史)",
+      "url": "https://www.autosar.org/fileadmin/standards/R4.3.1/CP/AUTOSAR_SWS_ECUStateManagerFixed.pdf"
+    },
+    {
+      "id": "src-mode-guide",
+      "title": "AUTOSAR EXP Mode Management Guide R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_EXP_ModeManagementGuide.pdf"
+    },
+    {
+      "id": "src-bswm",
+      "title": "AUTOSAR SWS BSW Mode Manager R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_BSWModeManager.pdf"
+    },
+    {
+      "id": "src-rte",
+      "title": "AUTOSAR SWS RTE R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_RTE.pdf"
+    },
+    {
+      "id": "src-nvm",
+      "title": "AUTOSAR SWS NVRAM Manager R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_NVRAMManager.pdf"
+    },
+    {
+      "id": "src-fee",
+      "title": "AUTOSAR SWS Flash EEPROM Emulation R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_FlashEEPROMEmulation.pdf"
+    },
+    {
+      "id": "src-fls",
+      "title": "AUTOSAR SWS Flash Driver R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_FlashDriver.pdf"
+    },
+    {
+      "id": "src-comm",
+      "title": "AUTOSAR SWS Communication Manager R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_COMManager.pdf"
+    },
+    {
+      "id": "src-cansm",
+      "title": "AUTOSAR SWS CAN State Manager R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_CANStateManager.pdf"
+    },
+    {
+      "id": "src-com",
+      "title": "AUTOSAR SWS COM R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_COM.pdf"
+    },
+    {
+      "id": "src-pdur",
+      "title": "AUTOSAR SWS PDU Router R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_PDURouter.pdf"
+    },
+    {
+      "id": "src-cantp",
+      "title": "AUTOSAR SWS CAN Transport Layer R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_CANTransportLayer.pdf"
+    },
+    {
+      "id": "src-nm",
+      "title": "AUTOSAR SWS Network Management Interface R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_NetworkManagementInterface.pdf"
+    },
+    {
+      "id": "src-e2e",
+      "title": "AUTOSAR SWS E2E Library R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_E2ELibrary.pdf"
+    },
+    {
+      "id": "src-dcm",
+      "title": "AUTOSAR SWS Diagnostic Communication Manager R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_DiagnosticCommunicationManager.pdf"
+    },
+    {
+      "id": "src-dem",
+      "title": "AUTOSAR SWS Diagnostic Event Manager R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_DiagnosticEventManager.pdf"
+    },
+    {
+      "id": "src-os",
+      "title": "AUTOSAR SWS Operating System R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_OS.pdf"
+    },
+    {
+      "id": "src-wdg",
+      "title": "AUTOSAR SWS Watchdog Driver R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_WatchdogDriver.pdf"
+    },
+    {
+      "id": "src-cdd",
+      "title": "AUTOSAR EXP CDD Design and Integration Guideline R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_EXP_CDDDesignAndIntegrationGuideline.pdf"
+    },
+    {
+      "id": "src-vfb",
+      "title": "AUTOSAR EXP Virtual Functional Bus R24-11",
+      "url": "https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_EXP_VFB.pdf"
+    },
+    {
+      "id": "src-arxml",
+      "title": "AUTOSAR TPS Generic Structure Template / ARXML",
+      "url": "https://www.autosar.org/standards/classic-platform/"
+    },
+    {
+      "id": "src-xcp",
+      "title": "ASAM MCD-1 XCP 与 A2L (MCD-2 MC) 概念参照",
+      "url": "https://www.asam.net/standards/detail/mcd-1-xcp/"
+    },
+    {
+      "id": "src-model",
+      "title": "本项目 src/model.mjs 教学模型（内部）",
+      "url": "https://github.com/yueyue1/Autosar-CP-Architecture-Framework-Laboratory"
+    },
+    {
+      "id": "src-tests",
+      "title": "本项目 tests 与 docs 教学说明（内部）",
+      "url": "https://github.com/yueyue1/Autosar-CP-Architecture-Framework-Laboratory"
+    }
+  ],
+  "documents": [
+    {
+      "id": "startup-ecum-flexible",
+      "title": "EcuM Flexible 启动顺序",
+      "category": "startup",
+      "tags": [
+        "EcuM",
+        "StartOS",
+        "BswM",
+        "启动"
+      ],
+      "summary": "从复位到 StartOS 之前与之后，EcuM 如何组织初始化块、配置选择与 post-OS 骨架。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/01-startup.md"
+      },
+      "refs": [
+        "src-ecum",
+        "src-mode-guide"
+      ],
+      "chunks": [
+        {
+          "id": "startup-ecum-flexible#1",
+          "heading": "EcuM_Init 是上电后的第一个 BSW 入口",
+          "level": 2,
+          "anchor": "ecum-init-是上电后的第一个-bsw-入口",
+          "keywords": [
+            "EcuM_Init",
+            "StartOS",
+            "InitBlock",
+            "Cat2"
+          ],
+          "text": "复位向量完成最小 C 环境（栈指针、时钟与 .data/.bss 初始化）之后，控制权交给 EcuM_Init()。此时操作系统尚未启动，因此 EcuM_Init 只能在中断受控、无 Cat2 中断依赖的上下文中准备基础条件：多核共享初始化、驱动初始化块 InitBlock、时钟与看门狗预配置。它不负责把系统推进到业务运行，只负责把系统带到可以调用 StartOS 的门槛。"
+        },
+        {
+          "id": "startup-ecum-flexible#2",
+          "heading": "InitZero 不使用 Post-Build 配置",
+          "level": 2,
+          "anchor": "initzero-不使用-post-build-配置",
+          "keywords": [
+            "InitZero",
+            "InitOne",
+            "Post-Build",
+            "一致性校验"
+          ],
+          "text": "EcuM 启动分为 InitZero 与 InitOne 两段。InitZero 运行在 Post-Build 配置仍不可用的早期阶段，只能用预编译时已知的信息，例如把 RAM 变量、栈与最小驱动准备到可用。当配置被加载并完成一致性校验后，才进入 InitOne，此时才能使用更完整的配置数据做初始化。混淆两段会误以为所有初始化都能读到配置。"
+        },
+        {
+          "id": "startup-ecum-flexible#3",
+          "heading": "Post-Build 配置选择与校验",
+          "level": 2,
+          "anchor": "post-build-配置选择与校验",
+          "keywords": [
+            "Post-Build",
+            "Flexible",
+            "一致性",
+            "BswM"
+          ],
+          "text": "Flexible EcuM 支持 Post-Build 与 Pre-Compile 等配置方式。使用 Post-Build 时，EcuM 在启动早期从固定位置选择一份配置指针，并通过配置 ID 与校验值做一致性检查，确认选中的初始化数据与当前软件匹配。若校验失败，系统应进入定义好的错误处理，而不是用一份不确定的配置继续启动。这一步决定了后续 InitOne 与 BswM 规则求值所依据的是哪套配置。"
+        },
+        {
+          "id": "startup-ecum-flexible#4",
+          "heading": "StartOS 是控制权边界",
+          "level": 2,
+          "anchor": "startos-是控制权边界",
+          "keywords": [
+            "StartOS",
+            "控制权",
+            "启动钩子",
+            "自动启动任务",
+            "StartupTwo"
+          ],
+          "text": "StartOS 是启动流程中真正的控制权分界。调用 StartOS 之前，代码仍以顺序方式运行；调用之后，调度器接管，按配置激活自动启动任务与启动钩子，原来的顺序代码不再直接回退。因此 EcuM 的启动被拆成 pre-OS 与 post-OS 两段，中间隔着一次不可逆的控制权交接，这正是理解 StartupTwo 为何不在同一调用栈里的关键。"
+        },
+        {
+          "id": "startup-ecum-flexible#5",
+          "heading": "post-OS 骨架顺序",
+          "level": 2,
+          "anchor": "post-os-骨架顺序",
+          "keywords": [
+            "SchM_Start",
+            "BswM_Init",
+            "SchM_Init",
+            "SchM_StartTiming"
+          ],
+          "text": "post-OS 阶段的调用骨架通常写作 SchM_Start、BswM_Init、SchM_Init、SchM_StartTiming 的顺序。不要仅凭函数名称把 SchM_Init 放到 SchM_Start 之前：SchM_Start 用于对接调度启动阶段，BswM_Init 会按配置初始化模式管理，随后才启动时间基准。具体顺序仍以所选版本与配置生成的代码为准，教学顺序用于理解依赖关系而非量产模板。"
+        },
+        {
+          "id": "startup-ecum-flexible#6",
+          "heading": "InitBlock 与驱动初始化位置",
+          "level": 2,
+          "anchor": "initblock-与驱动初始化位置",
+          "keywords": [
+            "InitBlock",
+            "Mcu",
+            "Port",
+            "上电时序"
+          ],
+          "text": "EcuM 用初始化块 InitBlock 把 Mcu、Port、Dio、Adc、Spi 等基础驱动组织成分组调用，顺序受硬件上电时序与模块依赖约束。并不是所有驱动都能放进同一个 InitBlock：有的必须在时钟稳定后、有的要等通信控制器就绪、有的需要 OS 之后。把示例分组当成唯一答案很危险，真实项目应按 MCU 手册与各模块 SWS 的初始化前置条件推演。"
+        }
+      ]
+    },
+    {
+      "id": "startup-fixed-vs-flexible",
+      "title": "Fixed 与 Flexible 状态机差异",
+      "category": "startup",
+      "tags": [
+        "Fixed",
+        "Flexible",
+        "STARTUP",
+        "BswM"
+      ],
+      "summary": "对照旧 Fixed 状态机与现代 Flexible 启动骨架，说清哪些术语是历史包袱、哪些不能照搬。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/01-startup.md"
+      },
+      "refs": [
+        "src-ecum",
+        "src-fixed"
+      ],
+      "chunks": [
+        {
+          "id": "startup-fixed-vs-flexible#1",
+          "heading": "Fixed 与 Flexible 的组织者不同",
+          "level": 2,
+          "anchor": "fixed-与-flexible-的组织者不同",
+          "keywords": [
+            "Fixed",
+            "Flexible",
+            "STARTUP",
+            "BswM",
+            "DriverInit"
+          ],
+          "text": "旧 EcuM Fixed（历史上以 R4.3.1 为参考）用一个固定状态机把启动拆成 STARTUP I、STARTUP II、RUN 等状态，并配有 DriverInitOne/Two/Three 等专用 callout，状态迁移路径是写死的。现代 EcuM Flexible 只保留启动骨架，把后续流程交给 BswM 按配置规则推进。两者共享上电早期概念，但不能把 Fixed 的状态表直接当成 Flexible 的实现。"
+        },
+        {
+          "id": "startup-fixed-vs-flexible#2",
+          "heading": "STARTUP I 与 STARTUP II 的真实含义",
+          "level": 2,
+          "anchor": "startup-i-与-startup-ii-的真实含义",
+          "keywords": [
+            "STARTUP I",
+            "STARTUP II",
+            "StartOS",
+            "RUN",
+            "Fixed"
+          ],
+          "text": "在 Fixed 状态机里，STARTUP I 表示操作系统启动前的基础初始化阶段，STARTUP II 表示 OS 已启动后由 EcuM 继续推进的阶段；二者之间隔着一次 StartOS。RUN 则是 Fixed 状态机中业务被允许运行的稳定状态。教学界面沿用这些标签只为讲解阶段感，它们不是 Flexible 必须存在的状态，也不应被当作统一的规范术语。"
+        },
+        {
+          "id": "startup-fixed-vs-flexible#3",
+          "heading": "InitTwo 与 InitThree 的旧职责",
+          "level": 2,
+          "anchor": "inittwo-与-initthree-的旧职责",
+          "keywords": [
+            "DriverInitTwo",
+            "DriverInitThree",
+            "InitThree",
+            "RTE",
+            "NvM"
+          ],
+          "text": "历史 Fixed 文档里，DriverInitTwo 与 DriverInitThree 承担不同职责，其中 InitThree 面向依赖已恢复 NvM 数据的模块；Fixed 甚至允许先启动带 STARTUP 模式的 RTE，再等待 NvM 并完成 InitThree。现代 Flexible 不要求实现这两个旧接口，因此不能假定一个现代 EcuM 必须调用 InitTwo 或 InitThree。"
+        },
+        {
+          "id": "startup-fixed-vs-flexible#4",
+          "heading": "为何现代 EcuM 移除 Fixed 状态机",
+          "level": 2,
+          "anchor": "为何现代-ecum-移除-fixed-状态机",
+          "keywords": [
+            "Flexible",
+            "R24-11",
+            "Post-Build",
+            "状态机"
+          ],
+          "text": "EcuM 规范在变更历史中记录了 Fixed 版本的移除，说明 R24-11 的 Flexible 不再沿用那套写死状态机。原因在于整车项目需要按配置裁剪启动顺序、支持多种变体与 Post-Build 选择，固定状态表难以覆盖。理解这一点，有助于避免在讨论现代 CP 平台时仍用 Fixed 的状态图去描述启动流程。"
+        },
+        {
+          "id": "startup-fixed-vs-flexible#5",
+          "heading": "对照表不该当工程模板",
+          "level": 2,
+          "anchor": "对照表不该当工程模板",
+          "keywords": [
+            "EcuM",
+            "BswM",
+            "RTE",
+            "NvM",
+            "对照表"
+          ],
+          "text": "把 Fixed 与 Flexible 并排做成对照表便于教学，但对照表只是帮助记忆差异，不是可以直接照搬到项目的工程模板。真实集成要以所选版本的 EcuM、BswM、RTE 各 SWS 与配置生成结果为准。尤其在起步顺序、NvM 与 RTE 的先后以及业务放行条件上，每个项目的策略都可能不同，不能把一张教学表当作统一规范。"
+        }
+      ]
+    },
+    {
+      "id": "startup-startuptwo-boundary",
+      "title": "EcuM_StartupTwo 与 StartOS 的边界",
+      "category": "startup",
+      "tags": [
+        "EcuM_StartupTwo",
+        "StartOS",
+        "启动钩子",
+        "控制权"
+      ],
+      "summary": "解释 pre-OS 与 post-OS 两段为何不连续，以及 StartupTwo 到底完成什么、不完成什么。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/01-startup.md"
+      },
+      "refs": [
+        "src-ecum"
+      ],
+      "chunks": [
+        {
+          "id": "startup-startuptwo-boundary#1",
+          "heading": "EcuM_StartupTwo 由谁调用",
+          "level": 2,
+          "anchor": "ecum-startuptwo-由谁调用",
+          "keywords": [
+            "EcuM_StartupTwo",
+            "EcuM_Init",
+            "StartOS",
+            "自动启动",
+            "启动钩子"
+          ],
+          "text": "在典型的 Flexible 集成里，EcuM_StartupTwo 并不是在 EcuM_Init 的同一个调用栈里被调用；它通常由 OS 启动后自动运行的某个 OS 任务或启动钩子作为首个动作调回。控制权先由 StartOS 交给调度器，再通过一个自动启动实体回到 EcuM，完成 post-OS 部分。理解这条控制流，才能解释为什么 StartOS 之后不能再假设顺序代码继续往下执行。"
+        },
+        {
+          "id": "startup-startuptwo-boundary#2",
+          "heading": "StartupTwo 到底做什么",
+          "level": 2,
+          "anchor": "startuptwo-到底做什么",
+          "keywords": [
+            "EcuM_StartupTwo",
+            "SchM",
+            "BswM",
+            "RTE",
+            "模式管理"
+          ],
+          "text": "EcuM_StartupTwo 主要完成 post-OS 部分：对接模式管理、调用 SchM 启动序列、初始化和启动 BswM，并驱动 BSW 调度与时间基准开始运转。它不直接替应用恢复业务数据，也不决定应用何时上线；这些后续动作由 BswM 按规则与 RTE 生命周期推进。所以 StartupTwo 是接回控制权并拉起模式管理骨架的一步，而不是完成全部启动的一步。"
+        },
+        {
+          "id": "startup-startuptwo-boundary#3",
+          "heading": "StartupTwo 与 BswM_Init 的关系",
+          "level": 2,
+          "anchor": "startuptwo-与-bswm-init-的关系",
+          "keywords": [
+            "EcuM_StartupTwo",
+            "BswM_Init",
+            "BswM_MainFunction",
+            "NvM",
+            "RTE"
+          ],
+          "text": "EcuM_StartupTwo 往往并不亲自实现所有后启动逻辑，而是把控制交给 BswM_Init 与后续的模式处理。BswM_Init 按配置装载规则与初始模式，之后的 BswM_MainFunction 或事件驱动的模式切换才逐步触发 NvM 读取、通信许可、RTE 启动等动作。把 StartupTwo 理解成启动骨架的接续点，而不是所有模块的初始化总入口，可以避免在一个函数里塞满业务初始化。"
+        },
+        {
+          "id": "startup-startuptwo-boundary#4",
+          "heading": "StartOS 之前不能做的事",
+          "level": 2,
+          "anchor": "startos-之前不能做的事",
+          "keywords": [
+            "StartOS",
+            "Cat2",
+            "扩展任务",
+            "PLL",
+            "pre-OS"
+          ],
+          "text": "StartOS 之前，调度器、扩展任务、事件与 OS Alarm 都不可用，因此 pre-OS 代码不能等待事件、不能依赖周期任务推进，也不应依赖 Cat2 中断完成关键握手。需要异步完成的事情（例如等待 PLL 锁定、等待某驱动就绪）在 pre-OS 阶段必须用轮询或明确的同步确认处理，而不能假设会有中断或任务来推进。这是理解 EcuM 前后两段约束差异的核心。"
+        },
+        {
+          "id": "startup-startuptwo-boundary#5",
+          "heading": "启动交接与多核屏障的差别",
+          "level": 2,
+          "anchor": "启动交接与多核屏障的差别",
+          "keywords": [
+            "StartCore",
+            "StartOS",
+            "启动屏障",
+            "多核",
+            "EcuM_StartupTwo"
+          ],
+          "text": "单核主线里，StartOS 之后由自动启动任务接回 EcuM_StartupTwo；多核系统还多出一层协调：主核调用 StartCore 启动其它核，被成功启动的核各自调用 StartOS，之后才可能通过启动屏障等待所有核到达就绪点。StartCore 不应在 StartOS 之后调用，被 StartCore 启动的核负责调用 StartOS。混淆单核交接与多核屏障，会误判启动到底卡在哪一层。"
+        }
+      ]
+    },
+    {
+      "id": "startup-bswm-arbitration",
+      "title": "BswM 模式仲裁规则",
+      "category": "startup",
+      "tags": [
+        "BswM",
+        "模式管理",
+        "Rule",
+        "ActionList"
+      ],
+      "summary": "讲清 BswM 如何接收模式请求、按规则求值并执行动作列表，以及它为何是上线放行的中枢。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/01-startup.md"
+      },
+      "refs": [
+        "src-bswm",
+        "src-mode-guide"
+      ],
+      "chunks": [
+        {
+          "id": "startup-bswm-arbitration#1",
+          "heading": "BswM 的职责",
+          "level": 2,
+          "anchor": "bswm-的职责",
+          "keywords": [
+            "BswM",
+            "模式请求",
+            "Rule",
+            "ActionList",
+            "EcuM"
+          ],
+          "text": "BswM（Basic Software Mode Manager）是 BS 层的模式仲裁与动作执行中心。它接收来自 EcuM、ComM、Dcm、NvM、Dem 等模块的模式请求，按配置的规则 Rule 评估条件，再执行动作列表 ActionList。BswM 本身不实现具体驱动或服务，而是把多个模块的模式状态汇总后，统一决定谁该放开、谁该等待，因此它是理解谁能上线的中枢。"
+        },
+        {
+          "id": "startup-bswm-arbitration#2",
+          "heading": "BswM_RequestMode 与规则求值",
+          "level": 2,
+          "anchor": "bswm-requestmode-与规则求值",
+          "keywords": [
+            "BswM_RequestMode",
+            "规则",
+            "模式条件",
+            "动作列表",
+            "NvM"
+          ],
+          "text": "模块通过 BswM_RequestMode 之类的接口提交模式请求，BswM 把请求记录为规则输入。规则由逻辑表达式组合多个模式条件，例如 EcuM 处于 RUN 且 NvM 已完成且 ComM 请求了 FULL。当输入变化时 BswM 重新求值相关规则，条件由假变真就执行对应动作列表。求值顺序与触发时机由配置决定，因此同一组请求在不同配置下可能得到不同的最终模式。"
+        },
+        {
+          "id": "startup-bswm-arbitration#3",
+          "heading": "ActionList 里有什么",
+          "level": 2,
+          "anchor": "actionlist-里有什么",
+          "keywords": [
+            "ActionList",
+            "ComM_CommunicationAllowed",
+            "ComM_RequestComMode",
+            "Rte_Start",
+            "动作"
+          ],
+          "text": "动作列表 ActionList 是一串按顺序执行的动作，常见动作包括调用 ComM_CommunicationAllowed 放开某通道许可、调用 ComM_RequestComMode 申请通信模式、触发 Rte_Start 或模式切换、启动或停止某模块的周期处理、通知 Dcm 切换诊断会话。动作可能立即执行也可能延迟到下一次 BswM 主函数，取决于配置的动作类型。理解动作列表，就能解释一次模式变化为何会引发一串下游动作。"
+        },
+        {
+          "id": "startup-bswm-arbitration#4",
+          "heading": "规则求值顺序与确定性",
+          "level": 2,
+          "anchor": "规则求值顺序与确定性",
+          "keywords": [
+            "BswM",
+            "规则求值",
+            "优先级",
+            "确定性",
+            "模式"
+          ],
+          "text": "BswM 的规则求值需要可预期：多条规则可能同时被触发，执行顺序通常按配置的优先级或列表顺序确定，动作之间也可能互相影响输入，即一个动作改变的模式会成为另一条规则的输入。因此工程上要避免规则环与隐式依赖，明确谁先谁后。教学仿真里每次模式变化都能确定性回放，也正依赖这种规则输入、求值、动作的确定顺序。"
+        },
+        {
+          "id": "startup-bswm-arbitration#5",
+          "heading": "BswM_Init 与初始模式",
+          "level": 2,
+          "anchor": "bswm-init-与初始模式",
+          "keywords": [
+            "BswM_Init",
+            "初始模式",
+            "规则求值",
+            "通信许可",
+            "RTE"
+          ],
+          "text": "BswM_Init 负责装载规则与初始模式，但它本身并不等于所有规则都已评估一遍。初始化后 BswM 依据初始模式与后续请求逐步评估规则，因此系统可能先处于一个保守的中间状态：例如通信许可尚未放开、RTE 尚未启动。把 BswM_Init 返回当作一切就绪是常见的误读；真正的放行要靠后续规则求值与动作执行来完成。"
+        },
+        {
+          "id": "startup-bswm-arbitration#6",
+          "heading": "BswM 如何用 NvM 完成推进启动",
+          "level": 2,
+          "anchor": "bswm-如何用-nvm-完成推进启动",
+          "keywords": [
+            "NvM",
+            "BswM",
+            "规则",
+            "RTE",
+            "多块读取"
+          ],
+          "text": "一个典型的后启动例子是：NvM 完成多块读取后，通过配置的接口向 BswM 反馈作业状态，BswM 的某条规则据此由数据未就绪转为数据就绪，动作列表于是允许 RTE 启动或业务模式切换。这解释了为什么 NvM 读完不等于业务已经上线：中间还隔着 BswM 的规则评估与动作执行，二者是不同层次的放行。"
+        }
+      ]
+    },
+    {
+      "id": "startup-rte-lifecycle",
+      "title": "RTE 启动流程与通信范式",
+      "category": "startup",
+      "tags": [
+        "RTE",
+        "Rte_Start",
+        "sender/receiver",
+        "client/server"
+      ],
+      "summary": "分清 Rte_Start、InitContainer 与 Rte_StartTiming，并说明两种通信范式与事件触发。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/01-startup.md"
+      },
+      "refs": [
+        "src-rte"
+      ],
+      "chunks": [
+        {
+          "id": "startup-rte-lifecycle#1",
+          "heading": "Rte_Start 的职责",
+          "level": 2,
+          "anchor": "rte-start-的职责",
+          "keywords": [
+            "Rte_Start",
+            "RTE",
+            "runnable",
+            "SWC",
+            "通信端口"
+          ],
+          "text": "Rte_Start 初始化 RTE 运行环境，包括通信端口、触发缓冲以及 RTE 内部数据结构，使 SWC 之间以及 SWC 与 BSW 之间可以通过 RTE 交互。它安排的是 RTE 自身的就绪，而不是应用 runnable 何时被调度执行。把 Rte_Start 视为应用开始运行是常见的误读：真正让周期或事件 runnable 开始执行的是后续的计时与调度启动。"
+        },
+        {
+          "id": "startup-rte-lifecycle#2",
+          "heading": "Rte_Init 与 InitContainer",
+          "level": 2,
+          "anchor": "rte-init-与-initcontainer",
+          "keywords": [
+            "Rte_Init",
+            "InitContainer",
+            "初始化 runnable",
+            "SWC",
+            "RTE"
+          ],
+          "text": "Rte_Start 之后，RTE 生成代码通常会调用 Rte_Init_<InitContainer> 之类的初始化容器，按配置批次调用各 SWC 的初始化 runnable。InitContainer 的名字由项目生成，指南里的 Rte_Init 只是简称。初始化 runnable 负责把 SWC 的内部状态摆到已知初值，但它们仍不等同于业务已经开始周期处理。理解这一层，能避免把初始化与周期调度混为一谈。"
+        },
+        {
+          "id": "startup-rte-lifecycle#3",
+          "heading": "Rte_StartTiming 才放开周期与后台",
+          "level": 2,
+          "anchor": "rte-starttiming-才放开周期与后台",
+          "keywords": [
+            "Rte_StartTiming",
+            "Rte_Start",
+            "周期触发",
+            "后台事件",
+            "runnable"
+          ],
+          "text": "Rte_StartTiming 负责放开 RTE 的计时机制，使周期触发、后台事件等按配置开始生效。也就是说 Rte_Start 让 RTE 就绪，Rte_StartTiming 让时间驱动的 runnable 真正开始跑。若业务依赖尚未恢复的持久数据，可以在数据就绪后再调用计时启动，或在 runnable 内检查数据有效性，这正是教学配置采用数据门控的根据。"
+        },
+        {
+          "id": "startup-rte-lifecycle#4",
+          "heading": "sender/receiver 与 client/server",
+          "level": 2,
+          "anchor": "sender-receiver-与-client-server",
+          "keywords": [
+            "sender/receiver",
+            "client/server",
+            "operation",
+            "runnable",
+            "事件"
+          ],
+          "text": "RTE 提供两类主要通信范式：sender/receiver 用于数据分布，发送端写数据、接收端读最新值或接收队列项；client/server 用于服务调用，client 发起同步或异步的 operation，server runnable 响应并返回结果。两者的触发与缓冲语义不同，sender/receiver 常与 dataReceived 事件或显式读取配合，client/server 则与 operationInvoked 事件、异步结果返回配合。选错范式会带来不必要的阻塞或数据丢失。"
+        },
+        {
+          "id": "startup-rte-lifecycle#5",
+          "heading": "RTE 事件与触发",
+          "level": 2,
+          "anchor": "rte-事件与触发",
+          "keywords": [
+            "RTE 事件",
+            "dataReceived",
+            "operationInvoked",
+            "timingEvent",
+            "runnable"
+          ],
+          "text": "RTE 事件把底层发生的事实转成 runnable 的触发：dataReceived 表示收到新数据、operationInvoked 表示有服务调用、modeSwitch 表示模式切换、timingEvent 表示周期到点。事件可以激活任务（在 OS 下映射为 SetEvent），也可以直接映射为 runnable 的激活。理解事件到 runnable 的映射，才能解释一次通信到达为什么最终变成某个函数被执行。"
+        }
+      ]
+    },
+    {
+      "id": "uds-dcm-session",
+      "title": "DCM 会话与安全状态机",
+      "category": "uds",
+      "tags": [
+        "DCM",
+        "会话",
+        "SecurityAccess",
+        "S3"
+      ],
+      "summary": "讲清默认/编程/扩展会话、S3 计时、0x27 Seed/Key 顺序与失败延迟，以及两道门的组合。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/02-uds.md"
+      },
+      "refs": [
+        "src-dcm"
+      ],
+      "chunks": [
+        {
+          "id": "uds-dcm-session#1",
+          "heading": "诊断会话的三种基本状态",
+          "level": 2,
+          "anchor": "诊断会话的三种基本状态",
+          "keywords": [
+            "会话",
+            "默认会话",
+            "编程会话",
+            "扩展会话",
+            "DCM"
+          ],
+          "text": "UDS 诊断以会话 Session 为上下文：默认会话 0x01 是复位后进入的受限状态，编程会话 0x02 用于刷写，扩展会话 0x03 提供更多服务权限。DCM 收到 10 02 或 10 03 后返回正响应并切换当前会话，之后各服务的可用性、可访问的 DID 与例程都会随会话变化。会话不是权限的全部，但它是所有服务前置条件的第一层。"
+        },
+        {
+          "id": "uds-dcm-session#2",
+          "heading": "S3 计时器与会话保持",
+          "level": 2,
+          "anchor": "s3-计时器与会话保持",
+          "keywords": [
+            "S3",
+            "TesterPresent",
+            "默认会话",
+            "安全等级",
+            "P2"
+          ],
+          "text": "非默认会话由 S3 计时器（典型 5 秒）维持，只有持续收到 TesterPresent（3E 00）或其它诊断请求才刷新计时。S3 超时后 DCM 回到默认会话，同时安全等级通常被重置为锁定。S3 与 P2/P2* 不是同一类参数：S3 管会话保持，后者管单次请求的响应时限。理解这一点，才能解释为什么一段时间不操作就掉回默认会话。"
+        },
+        {
+          "id": "uds-dcm-session#3",
+          "heading": "SecurityAccess 0x27 的 Seed/Key 顺序",
+          "level": 2,
+          "anchor": "securityaccess-0x27-的-seed-key-顺序",
+          "keywords": [
+            "安全访问",
+            "0x27",
+            "Seed",
+            "Key",
+            "安全等级"
+          ],
+          "text": "安全访问由一对子功能完成：0x27 请求种子，ECU 返回一个 Seed；诊断仪按约定算法算出 Key，用 0x27 的另一子功能连同 Key 发回，ECU 校验通过后把安全等级置为解锁。顺序被严格约束：必须先取 Seed 再发 Key，且 Seed 通常一次性有效。安全访问必须在扩展或编程会话中进行，服务本身往往还要求会话前提。"
+        },
+        {
+          "id": "uds-dcm-session#4",
+          "heading": "安全访问失败与延迟",
+          "level": 2,
+          "anchor": "安全访问失败与延迟",
+          "keywords": [
+            "NRC 0x35",
+            "NRC 0x37",
+            "安全延迟",
+            "Seed",
+            "密码学"
+          ],
+          "text": "发错 Key 会得到负响应 NRC 0x35（invalidKey），连续多次失败后 ECU 进入安全延迟，再请求种子会被 NRC 0x37（requiredTimeDelayNotExpired）拒绝，直到延迟结束。延迟状态与会话内安全等级一起构成一个显式状态机。教学实验里的 Seed/Key 算法被公开且简单，只用于观察状态迁移，没有密码学安全性，绝不能当量产密钥设计。"
+        },
+        {
+          "id": "uds-dcm-session#5",
+          "heading": "会话与安全是两道门",
+          "level": 2,
+          "anchor": "会话与安全是两道门",
+          "keywords": [
+            "会话",
+            "安全",
+            "清除 DTC",
+            "DID",
+            "NRC"
+          ],
+          "text": "一个受保护服务往往同时受会话与安全两道门约束。例如清除 DTC 需要扩展或编程会话且已解锁；写入 DID 也类似。若会话不对，DCM 先回 NRC 0x7F；若会话对但未解锁，则回安全相关的 NRC。把两道门分开看，才能定位请求被拒到底卡在哪一层，而不是笼统归因于权限不足。"
+        },
+        {
+          "id": "uds-dcm-session#6",
+          "heading": "功能寻址与抑制正响应",
+          "level": 2,
+          "anchor": "功能寻址与抑制正响应",
+          "keywords": [
+            "功能寻址",
+            "物理寻址",
+            "抑制正响应",
+            "DCM",
+            "3E 80"
+          ],
+          "text": "除了物理寻址，诊断还支持功能寻址：广播到一组 ECU，只有满足条件的 ECU 才响应。为避免总线上响应风暴，请求可设置抑制正响应位（例如 3E 80），让 ECU 执行但不在总线上回正响应。这些机制属于 DCM 的寻址与响应控制层，与会话、安全是正交的约束，理解它们能解释为什么某些请求看不到回应但已经生效。"
+        }
+      ]
+    },
+    {
+      "id": "uds-dcm-timing",
+      "title": "诊断时序 P2/P2* 与 NRC 0x78",
+      "category": "uds",
+      "tags": [
+        "P2",
+        "P2*",
+        "NRC",
+        "响应"
+      ],
+      "summary": "区分 P2 与 P2*、说明 NRC 0x78 的正确用法、负响应结构与常见 NRC 速记。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/02-uds.md"
+      },
+      "refs": [
+        "src-dcm"
+      ],
+      "chunks": [
+        {
+          "id": "uds-dcm-timing#1",
+          "heading": "P2 与 P2* 的含义",
+          "level": 2,
+          "anchor": "p2-与-p2-的含义",
+          "keywords": [
+            "P2",
+            "P2*",
+            "NRC 0x78",
+            "超时",
+            "DCM"
+          ],
+          "text": "P2 是 ECU 对一次请求给出首个响应的最大时间，超时诊断仪会认为失败；P2* 是在发送 NRC 0x78（responsePending）之后，允许延长等待的时限。DCM 用它们调度服务处理与超时。教学实验中的这两个时间参数是示例，不应被当作真实 ECU 的实测值。"
+        },
+        {
+          "id": "uds-dcm-timing#2",
+          "heading": "NRC 0x78 的正确用法",
+          "level": 2,
+          "anchor": "nrc-0x78-的正确用法",
+          "keywords": [
+            "NRC 0x78",
+            "P2*",
+            "最终响应",
+            "擦除",
+            "分区"
+          ],
+          "text": "当服务处理时间可能超过 P2 时，ECU 先回 NRC 0x78 表示请求仍在处理，随后在 P2* 期限内给出最终响应。0x78 不是失败，而是请继续等待的中间响应。实验里擦除这类耗时动作用 0x78 呈现，等待期间不会提前把目标分区标记为完成，这体现了协议顺序与真实状态的分离。"
+        },
+        {
+          "id": "uds-dcm-timing#3",
+          "heading": "负响应的结构",
+          "level": 2,
+          "anchor": "负响应的结构",
+          "keywords": [
+            "负响应",
+            "7F",
+            "NRC",
+            "无响应",
+            "SID"
+          ],
+          "text": "负响应固定为三字节起：0x7F、原请求 SID、NRC 码。例如 7F 14 7E 表示对 ClearDiagnosticInformation 的当前会话不支持拒绝。读懂这三个字节，就能快速区分是哪条服务、被什么原因拒绝。把无响应与负响应区分开很重要：7F 开头是 ECU 确实发出了回应，而无响应通常属于传输或链路层面问题。"
+        },
+        {
+          "id": "uds-dcm-timing#4",
+          "heading": "常见 NRC 码速记",
+          "level": 2,
+          "anchor": "常见-nrc-码速记",
+          "keywords": [
+            "NRC",
+            "0x11",
+            "0x13",
+            "0x24",
+            "0x78"
+          ],
+          "text": "常用 NRC 包括 0x11 服务不支持、0x12 子功能不支持、0x13 长度或格式错误、0x22 条件不满足、0x24 请求顺序错误、0x31 参数超出范围、0x33 安全访问被拒、0x35 无效 Key、0x37 延迟未到、0x72 编程失败、0x73 块序号错误、0x78 响应挂起。记住这些码的语义，比背具体数值更能定位问题所在层次。"
+        },
+        {
+          "id": "uds-dcm-timing#5",
+          "heading": "无响应不等于某个 NRC",
+          "level": 2,
+          "anchor": "无响应不等于某个-nrc",
+          "keywords": [
+            "无响应",
+            "NRC",
+            "Bus-Off",
+            "CanTp",
+            "链路"
+          ],
+          "text": "总线断开、Bus-Off、寻址不匹配或 CanTp 超时都会导致诊断仪收不到任何响应，这种无响应不是 ECU 返回了某个 NRC，而是传输或通信层面失败。把它解释成某个负响应码是常见的错误推断。正确做法是先确认链路与实际通信模式，再看协议层是否真的回了 7F 开头的负响应。"
+        }
+      ]
+    },
+    {
+      "id": "uds-dem-dtc",
+      "title": "DEM 事件内存与 DTC 状态字节",
+      "category": "uds",
+      "tags": [
+        "Dem",
+        "DTC",
+        "状态字节",
+        "事件内存"
+      ],
+      "summary": "说明 Dem_SetEventStatus、debounce 迁移、DTC 状态位含义、事件内存优先级与清除持久化边界。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/02-uds.md"
+      },
+      "refs": [
+        "src-dem"
+      ],
+      "chunks": [
+        {
+          "id": "uds-dem-dtc#1",
+          "heading": "Dem 的职责",
+          "level": 2,
+          "anchor": "dem-的职责",
+          "keywords": [
+            "Dem",
+            "Dem_SetEventStatus",
+            "debounce",
+            "DTC",
+            "事件内存"
+          ],
+          "text": "Dem（Diagnostic Event Manager）负责处理 ECU 内部的诊断事件：应用或 BSW 通过 Dem_SetEventStatus 上报事件通过、失败或预失败，Dem 依据配置的 debounce 策略判定事件是否稳定成立，再更新对应的 DTC 状态并管理事件内存。Dem 不直接与诊断仪通信，它把故障数据准备好，由 DCM 通过 0x19 等服务读出。"
+        },
+        {
+          "id": "uds-dem-dtc#2",
+          "heading": "DTC 状态字节的 8 位",
+          "level": 2,
+          "anchor": "dtc-状态字节的-8-位",
+          "keywords": [
+            "testFailed",
+            "pendingDtc",
+            "confirmedDtc",
+            "状态字节",
+            "warningIndicatorRequested"
+          ],
+          "text": "读取 DTC 时每个 DTC 附带一个状态字节，常见位含义包括：testFailed 表示当前测试失败、testFailedThisOperationCycle 表示本操作循环内曾失败、pendingDtc 表示待定、confirmedDtc 表示已确认、testNotCompletedSinceLastClear 表示清除后尚未完成测试、warningIndicatorRequested 表示请求点亮报警，另有保留位。理解每一位，才能解释为什么某 DTC 已确认但当前测试通过。"
+        },
+        {
+          "id": "uds-dem-dtc#3",
+          "heading": "debounce 与 pending/confirmed 的迁移",
+          "level": 2,
+          "anchor": "debounce-与-pending-confirmed-的迁移",
+          "keywords": [
+            "debounce",
+            "pending",
+            "confirmedDtc",
+            "healing",
+            "DTC"
+          ],
+          "text": "事件从一次失败到 confirmedDtc 通常要经历 debounce：连续失败达到阈值才判为 confirmed，中间状态可表现为 pending。恢复时也可能需要连续通过或特定的 healing 计数才清除。所以测到一次失败不等于已确认 DTC，诊断仪看到的 pending 与 confirmed 是两个不同成熟度的状态，工程上要区分报告与确认。"
+        },
+        {
+          "id": "uds-dem-dtc#4",
+          "heading": "事件内存与优先级",
+          "level": 2,
+          "anchor": "事件内存与优先级",
+          "keywords": [
+            "事件内存",
+            "优先级",
+            "RAM-only",
+            "NvM",
+            "掉电"
+          ],
+          "text": "Dem 用事件内存保存 DTC 及其状态，内存可以配置为主/次存储或按优先级替换：当内存满而新故障优先级更高时，可挤出低优先级记录。事件内存还分 RAM-only 与持久化两类：RAM-only 的 Dem 掉电即丢失，使用持久块时则依赖 NvM 保存，使用前要检查其有效性与完整性。选哪种取决于项目对掉电后诊断连续性的要求。"
+        },
+        {
+          "id": "uds-dem-dtc#5",
+          "heading": "0x19 读取 DTC 的子功能",
+          "level": 2,
+          "anchor": "0x19-读取-dtc-的子功能",
+          "keywords": [
+            "0x19",
+            "ReadDTCInformation",
+            "状态掩码",
+            "DTC",
+            "子功能"
+          ],
+          "text": "ReadDTCInformation（0x19）有多个子功能：0x02 按状态掩码报告 DTC、0x01 报告数量、0x0A 报告支持的 DTC 等。诊断仪给出状态掩码，ECU 只返回满足条件的 DTC 记录，每条记录是三字节 DTC 加一字节状态。子功能与服务权限、会话条件相关，读 DTC 通常不需要解锁，但报告范围受掩码控制。"
+        },
+        {
+          "id": "uds-dem-dtc#6",
+          "heading": "DTC 清除的持久化边界",
+          "level": 2,
+          "anchor": "dtc-清除的持久化边界",
+          "keywords": [
+            "0x14",
+            "Dem",
+            "NvM",
+            "持久化",
+            "掉电"
+          ],
+          "text": "清除 DTC（0x14）在协议上会立即更新 Dem 当前的 RAM 状态，但它的长期效果取决于持久化：如果 Dem 使用持久化事件内存，清除意图要经 NvM 异步队列提交后才在掉电后保持。因此正响应已返回不等于掉电后 DTC 一定消失，这正是共享存储实验要展示的请求、提交与持久化之间的边界。"
+        }
+      ]
+    },
+    {
+      "id": "uds-flashing",
+      "title": "刷写流程 34/36/37",
+      "category": "uds",
+      "tags": [
+        "刷写",
+        "RequestDownload",
+        "TransferData",
+        "例程"
+      ],
+      "summary": "梳理教学刷写顺序、RequestDownload 参数、块序号约束与擦除校验激活例程的边界。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/02-uds.md"
+      },
+      "refs": [
+        "src-dcm"
+      ],
+      "chunks": [
+        {
+          "id": "uds-flashing#1",
+          "heading": "刷写的基本顺序",
+          "level": 2,
+          "anchor": "刷写的基本顺序",
+          "keywords": [
+            "10 02",
+            "27",
+            "34",
+            "36",
+            "37"
+          ],
+          "text": "一条典型教学刷写路径是：10 02 进入编程会话、27 完成安全访问、擦除非活动分区、34 RequestDownload 声明地址与长度、36 TransferData 分块传输、37 RequestTransferExit 结束、校验镜像、激活分区。每一步都为下一步建立前提，例如 0x36 之前必须存在有效的 RequestDownload，0x37 之前所有声明字节必须传完。"
+        },
+        {
+          "id": "uds-flashing#2",
+          "heading": "RequestDownload 的参数",
+          "level": 2,
+          "anchor": "requestdownload-的参数",
+          "keywords": [
+            "RequestDownload",
+            "0x34",
+            "dataFormatIdentifier",
+            "0x36",
+            "地址"
+          ],
+          "text": "RequestDownload（0x34）携带 dataFormatIdentifier、地址与长度等参数，ECU 据此判断能否接受这次下载，并可能返回最大块长度等限制。它只是启动下载过程，并不传输数据本身；后续 0x36 必须遵循此前声明的地址范围与总长度。把 0x34 当成开始写 Flash 是误读，真正的数据搬运发生在 0x36 阶段。"
+        },
+        {
+          "id": "uds-flashing#3",
+          "heading": "TransferData 的块序号",
+          "level": 2,
+          "anchor": "transferdata-的块序号",
+          "keywords": [
+            "TransferData",
+            "0x36",
+            "块序号",
+            "NRC 0x73",
+            "0x24"
+          ],
+          "text": "TransferData（0x36）携带块序号与数据，块序号必须从 1 开始连续递增；跳块或序号错误会得到 NRC 0x73。未声明下载就发送数据、镜像未收完整就结束、未校验就激活，都会因顺序错误得到相应 NRC，例如 0x24。块序号机制保证数据被有序、完整地重组，是刷写可靠性的基础。"
+        },
+        {
+          "id": "uds-flashing#4",
+          "heading": "擦除、校验与激活的例程",
+          "level": 2,
+          "anchor": "擦除-校验与激活的例程",
+          "keywords": [
+            "0x31",
+            "例程",
+            "擦除",
+            "校验",
+            "激活"
+          ],
+          "text": "实际刷写常配合例程控制（0x31）完成擦除、校验和激活：擦除非活动分区、对镜像做 CRC 校验、再激活新分区。这些例程 ID 在各项目里常是私有约定，教学实验用虚构的 FF00/FF01/FF02 表示，不能声称它们是标准例程。校验失败（如 CRC 错）应回相应 NRC，且活动分区与版本保持不变。"
+        },
+        {
+          "id": "uds-flashing#5",
+          "heading": "刷写之外的工程条件",
+          "level": 2,
+          "anchor": "刷写之外的工程条件",
+          "keywords": [
+            "供电",
+            "签名",
+            "Bootloader",
+            "P2",
+            "NRC 0x78"
+          ],
+          "text": "真实安全刷写远不止协议顺序：还需要稳定的供电条件、Flash 驱动、掉电恢复、签名与证书链、安全启动、防回滚、兼容性检查、Bootloader 跳转、真实的 P2/P2* 调度、传输超时与失败回滚。教学实验只用确定的 NRC 0x78 擦除等待来呈现顺序与门控，不涉及这些量产要素，不能据此认为已经具备可烧录能力。"
+        }
+      ]
+    },
+    {
+      "id": "uds-isotp",
+      "title": "ISO-TP 分帧与流控",
+      "category": "uds",
+      "tags": [
+        "ISO-TP",
+        "CanTp",
+        "流控",
+        "分帧"
+      ],
+      "summary": "解释 SF/FF/FC/CF 四种帧、Block Size 与 STmin、流控与超时故障，以及 CAN FD 的边界。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/02-uds.md"
+      },
+      "refs": [
+        "src-cantp"
+      ],
+      "chunks": [
+        {
+          "id": "uds-isotp#1",
+          "heading": "ISO-TP 的分帧角色",
+          "level": 2,
+          "anchor": "iso-tp-的分帧角色",
+          "keywords": [
+            "ISO-TP",
+            "CanTp",
+            "UDS",
+            "First Frame",
+            "Consecutive Frame"
+          ],
+          "text": "ISO-TP（ISO 15765-2）是 CAN 上的传输层，负责把超过单帧容量的诊断消息分段为若干 CAN 帧并在接收端重组。UDS 负责服务语义，CanTp 负责分段、流控与重组的机械工作，两者是不同层次。一条长响应的展开通常是 First Frame、Flow Control、多个 Consecutive Frame，理解这条路径才能读懂诊断仪与 ECU 的交互。"
+        },
+        {
+          "id": "uds-isotp#2",
+          "heading": "SF/FF/CF/FC 四种帧",
+          "level": 2,
+          "anchor": "sf-ff-cf-fc-四种帧",
+          "keywords": [
+            "单帧",
+            "首帧",
+            "连续帧",
+            "流控帧",
+            "序号"
+          ],
+          "text": "ISO-TP 有四种帧类型：单帧 SF 承载能放进一帧的短消息；首帧 FF 声明总长度并携带开头数据；连续帧 CF 按序号续传剩余数据；流控帧 FC 由接收端告诉发送端可以继续、等待还是溢出。每次分段传输都是一次收发双方按帧类型与序号配合的协议过程，而不是简单的数据切割。"
+        },
+        {
+          "id": "uds-isotp#3",
+          "heading": "Block Size 与 STmin",
+          "level": 2,
+          "anchor": "block-size-与-stmin",
+          "keywords": [
+            "Block Size",
+            "STmin",
+            "流控帧",
+            "吞吐",
+            "缓冲"
+          ],
+          "text": "流控帧携带 Block Size 与 STmin：Block Size 规定发送端在等下一个流控前最多连续发多少帧，STmin 规定两帧之间的最小间隔。调小 Block Size 或增大 STmin 会降低吞吐但提高可靠性，反之更容易因缓冲不足丢帧。这些参数属于传输层的节奏控制，与应用层服务语义无关。"
+        },
+        {
+          "id": "uds-isotp#4",
+          "heading": "流控与超时故障",
+          "level": 2,
+          "anchor": "流控与超时故障",
+          "keywords": [
+            "流控",
+            "超时",
+            "序号",
+            "传输台",
+            "负响应"
+          ],
+          "text": "若发送端等不到流控帧、或接收端缓冲溢出、或连续帧序号错误，传输就会失败。教学传输台可以注入丢 FC、丢 CF 和错误序号，用来区分协议层失败与应用层负响应。这类失败不会变成某个 UDS 负响应码，而是传输超时或重组失败，是理解诊断无响应原因的重要一环。"
+        },
+        {
+          "id": "uds-isotp#5",
+          "heading": "CAN FD 不改变 ISO-TP 语义",
+          "level": 2,
+          "anchor": "can-fd-不改变-iso-tp-语义",
+          "keywords": [
+            "CAN FD",
+            "ISO-TP",
+            "流控",
+            "UDS",
+            "数据长度"
+          ],
+          "text": "CAN FD 单帧可承载更多数据，因此相同负载所需的分段帧更少，但 CAN FD 不会消除 ISO-TP 的流控、顺序检查与超时概念，也不会改变 UDS 的服务语义。以为 CAN FD 能提升 UDS 语义是常见误解：它只放宽了单帧载荷与数据长度，协议层的分段与确认规则依旧存在。"
+        }
+      ]
+    },
+    {
+      "id": "comm-pdur-path",
+      "title": "COM/PduR/CanIf/CanTp 数据路径",
+      "category": "communication",
+      "tags": [
+        "COM",
+        "PduR",
+        "CanIf",
+        "CanTp"
+      ],
+      "summary": "沿一条应用输出追到底层与总线，讲清 PduR 路由、CanIf 边界、发送确认与诊断共用路径。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/03-communication.md"
+      },
+      "refs": [
+        "src-com",
+        "src-pdur"
+      ],
+      "chunks": [
+        {
+          "id": "comm-pdur-path#1",
+          "heading": "从应用到总线的路径",
+          "level": 2,
+          "anchor": "从应用到总线的路径",
+          "keywords": [
+            "RTE",
+            "COM",
+            "PduR",
+            "CanIf",
+            "I-PDU"
+          ],
+          "text": "一条应用输出的典型下行路径是：SWC 经 RTE 写入信号，COM 把信号打包进 I-PDU，PduR 按路由把 PDU 交给 CanIf，CanIf 发到 CAN 驱动，最终上总线。接收方向相反：驱动收帧、CanIf 过滤、PduR 分发、COM 解包、RTE 更新，再触发 runnable。理解这条链路，才能定位一次数据未到达到底断在哪一层。"
+        },
+        {
+          "id": "comm-pdur-path#2",
+          "heading": "PduR 的路由角色",
+          "level": 2,
+          "anchor": "pdur-的路由角色",
+          "keywords": [
+            "PduR",
+            "COM",
+            "CanIf",
+            "CanTp",
+            "Dcm"
+          ],
+          "text": "PduR（PDU Router）位于通信栈中部，负责在不同上层模块与下层总线接口之间转发 PDU：把 COM 的发送 PDU 路由到 CanIf，把 CanIf 收到的 PDU 路由到 COM 或 CanTp，把 CanTp 的诊断 PDU 路由到 Dcm。路由关系完全由配置决定，PduR 本身不解释数据内容。它是通信数据路径与诊断数据路径共用的交通枢纽。"
+        },
+        {
+          "id": "comm-pdur-path#3",
+          "heading": "COM 的信号打包与发送模式",
+          "level": 2,
+          "anchor": "com-的信号打包与发送模式",
+          "keywords": [
+            "COM",
+            "信号",
+            "I-PDU",
+            "周期发送",
+            "事件发送"
+          ],
+          "text": "COM 把多个信号按配置打包进 I-PDU，并按发送模式决定何时发送：周期发送、事件发送或混合。收到信号后可能触发 PDU 更新，再由下层周期或立即发出。信号的初值、更新位、超时替换值也由 COM 管理，因此应用的信号与总线上的报文并不是一一对应，理解打包与发送模式才能解释报文时序。"
+        },
+        {
+          "id": "comm-pdur-path#4",
+          "heading": "CanIf 的职责边界",
+          "level": 2,
+          "anchor": "canif-的职责边界",
+          "keywords": [
+            "CanIf",
+            "CAN 驱动",
+            "发送缓冲",
+            "收发过滤",
+            "CanTp"
+          ],
+          "text": "CanIf（CAN Interface）在 CAN 驱动与上层之间做抽象：管理发送缓冲、PDU 通道、硬件对象映射与收发过滤，并向上报告收发结果。它不负责分段（那是 CanTp）也不负责信号打包（那是 COM）。CanIf 还能表达发送确认与错误通知，是观察报文是否真的发出这一层的合适位置。"
+        },
+        {
+          "id": "comm-pdur-path#5",
+          "heading": "发送确认不等于对端已收到",
+          "level": 2,
+          "anchor": "发送确认不等于对端已收到",
+          "keywords": [
+            "发送确认",
+            "远端",
+            "E2E",
+            "端到端",
+            "监督"
+          ],
+          "text": "底层给出的发送确认通常表示帧已被控制器成功发出，或至少进入发送过程，并不等于远端 ECU 已经收到或应用已经处理。真正的端到端确认要靠应用层握手、周期监督或 E2E 保护来判断。把发送确认当成端到端送达，是通信诊断里很常见的过度乐观。分辨发送这一层与送达这一层，能避免把链路正常误判为业务已经完成。"
+        },
+        {
+          "id": "comm-pdur-path#6",
+          "heading": "诊断与应用的共用路径",
+          "level": 2,
+          "anchor": "诊断与应用的共用路径",
+          "keywords": [
+            "诊断",
+            "RTE",
+            "PduR",
+            "CanTp",
+            "Bus-Off"
+          ],
+          "text": "诊断请求与应用信号共享同一套底层：诊断帧经 CanIf、CanTp、PduR 到达 Dcm，应用信号经 CanIf、PduR、COM 到达 RTE。二者在 PduR 处分流，但都依赖 CAN 驱动与总线可用。因此总线 Bus-Off 时，应用报文与诊断请求会同时受影响，这也解释了为什么诊断无响应有时与协议无关。"
+        }
+      ]
+    },
+    {
+      "id": "comm-nm",
+      "title": "网络管理 NM 状态机",
+      "category": "communication",
+      "tags": [
+        "NM",
+        "ComM",
+        "休眠",
+        "唤醒"
+      ],
+      "summary": "从 Nm_NetworkRequest 到 BusSleep，讲清 RepeatMessage、NormalOperation 与超时刷新。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/03-communication.md"
+      },
+      "refs": [
+        "src-nm"
+      ],
+      "chunks": [
+        {
+          "id": "comm-nm#1",
+          "heading": "NM 的目标",
+          "level": 2,
+          "anchor": "nm-的目标",
+          "keywords": [
+            "网络管理",
+            "NM",
+            "唤醒",
+            "休眠",
+            "NM 报文"
+          ],
+          "text": "网络管理 NM 的目标是协调同一网络上的节点，使它们在需要通信时一起保持唤醒，在都不需要时一致地进入休眠，避免某些节点独自休眠导致网络无法唤醒。NM 通过周期发送 NM 报文互相报到，每个节点根据本地请求与他人报文决定状态。它解决的是网络级协同，而不是单个 ECU 的业务。"
+        },
+        {
+          "id": "comm-nm#2",
+          "heading": "RepeatMessage 状态",
+          "level": 2,
+          "anchor": "repeatmessage-状态",
+          "keywords": [
+            "Nm_NetworkRequest",
+            "RepeatMessage",
+            "NM 报文",
+            "唤醒",
+            "超时"
+          ],
+          "text": "节点通过 Nm_NetworkRequest 发起网络请求后进入 RepeatMessage 状态，此阶段以较快周期发送 NM 报文，声明自己希望网络保持唤醒。收到其它节点的 NM 报文会刷新接收超时，使网络继续保持活跃。RepeatMessage 是我要用网络的显式表达，也是网络被唤醒后各节点达成一致的第一步。"
+        },
+        {
+          "id": "comm-nm#3",
+          "heading": "NormalOperation 与 ReadySleep",
+          "level": 2,
+          "anchor": "normaloperation-与-readysleep",
+          "keywords": [
+            "NormalOperation",
+            "ReadySleep",
+            "PrepareBusSleep",
+            "BusSleep",
+            "超时"
+          ],
+          "text": "网络正常通信时，节点处于 NormalOperation 状态并按需维持 NM 报文；当节点不再需要网络时，它停止请求并进入 ReadySleep，等待网络整体安静，只要仍收到他人 NM 报文就维持。当所有节点都不再请求且超时到期，网络才进入 PrepareBusSleep，最终 BusSleep。因此本地释放请求并不等于立即休眠，因为别的节点的报文仍会让网络保持唤醒。"
+        },
+        {
+          "id": "comm-nm#4",
+          "heading": "PrepareBusSleep 与 BusSleep",
+          "level": 2,
+          "anchor": "preparebussleep-与-bussleep",
+          "keywords": [
+            "PrepareBusSleep",
+            "BusSleep",
+            "收发器",
+            "唤醒",
+            "休眠"
+          ],
+          "text": "PrepareBusSleep 是休眠前的缓冲状态，此时节点通常已停止发送应用报文，等待总线安静并准备关闭收发器；之后进入 BusSleep，收发器进入低功耗并依赖唤醒事件。收到唤醒条件（如总线活动或本地唤醒源）会触发网络重新唤醒，流程回到 RepeatMessage。这条状态链是观察整车休眠与唤醒节奏的核心。"
+        },
+        {
+          "id": "comm-nm#5",
+          "heading": "NM 报文周期与超时",
+          "level": 2,
+          "anchor": "nm-报文周期与超时",
+          "keywords": [
+            "NM 报文",
+            "超时",
+            "周期",
+            "休眠",
+            "释放"
+          ],
+          "text": "NM 报文的周期与超时参数决定了网络收敛速度：周期过快会增加总线负载，过慢会让休眠判断迟迟不成立。教学实验里的时间参数放在配置中，其它节点的 NM 报文会刷新接收超时，所以一个节点释放本地请求后，仍要等所有节点都安静、超时都到期，网络才会整体转入休眠。"
+        }
+      ]
+    },
+    {
+      "id": "comm-comm-cansm",
+      "title": "ComM 与 CanSM 模式许可",
+      "category": "communication",
+      "tags": [
+        "ComM",
+        "CanSM",
+        "通信模式",
+        "许可"
+      ],
+      "summary": "分清通信许可、请求模式与实际模式，说明 CanSM 异步推进和 SILENT_COM 的含义。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/03-communication.md"
+      },
+      "refs": [
+        "src-comm",
+        "src-cansm"
+      ],
+      "chunks": [
+        {
+          "id": "comm-comm-cansm#1",
+          "heading": "ComM 的许可与请求",
+          "level": 2,
+          "anchor": "comm-的许可与请求",
+          "keywords": [
+            "ComM",
+            "CommunicationAllowed",
+            "ComM_RequestComMode",
+            "FULL_COMMUNICATION",
+            "BswM"
+          ],
+          "text": "ComM（Communication Manager）管理每个通道的通信模式。初始化后通道的 CommunicationAllowed 默认关闭；放开许可（通常由 BswM 动作调用 ComM_CommunicationAllowed）是前提，应用再通过 ComM_RequestComMode 申请 FULL_COMMUNICATION。放开许可、申请模式、总线真正进入该模式是三件不同的事，不能只看模块是否变绿。"
+        },
+        {
+          "id": "comm-comm-cansm#2",
+          "heading": "请求模式与实际模式",
+          "level": 2,
+          "anchor": "请求模式与实际模式",
+          "keywords": [
+            "ComM_RequestComMode",
+            "CanSM",
+            "实际模式",
+            "请求模式",
+            "ComM_BusSM_ModeIndication"
+          ],
+          "text": "ComM_RequestComMode 表达本 ECU 的通信需求，它可能立即接受请求却暂时达不到实际模式：还要经 CanSM 推进控制器与收发器状态，最终由 ComM_BusSM_ModeIndication 之类接口反馈实际模式。所以请求了 FULL 与实际处于 FULL 可以暂时不同，尤其在上电早期或故障恢复时。"
+        },
+        {
+          "id": "comm-comm-cansm#3",
+          "heading": "CanSM 的异步推进",
+          "level": 2,
+          "anchor": "cansm-的异步推进",
+          "keywords": [
+            "CanSM",
+            "CanSM_RequestComMode",
+            "异步",
+            "收发器",
+            "E_OK"
+          ],
+          "text": "CanSM（CAN State Manager）负责把 ComM 的请求翻译成 CAN 控制器与收发器的具体模式推进。CanSM_RequestComMode 是异步接口，返回 E_OK 只表示请求被接受，真实状态要经过控制器模式确认、收发器使能等步骤，再以指示回调反馈。CAN 控制器已初始化不等于所有应用 PDU 已获准发送。"
+        },
+        {
+          "id": "comm-comm-cansm#4",
+          "heading": "SILENT_COM 与 Bus-Off",
+          "level": 2,
+          "anchor": "silent-com-与-bus-off",
+          "keywords": [
+            "SILENT_COM",
+            "Bus-Off",
+            "RUN",
+            "通信",
+            "发送"
+          ],
+          "text": "当总线出现 Bus-Off，实际通信模式可能停滞在 SILENT_COM：控制器只能听不能发。此时应用仍可处于 RUN，但报文发不出去，系统不会伪造成功发送。区分应用可运行与通信实际可用很重要，尤其在做故障诊断时，前者不代表后者，后者也不代表每条网络都 FULL。"
+        },
+        {
+          "id": "comm-comm-cansm#5",
+          "heading": "通道与 ECU 不是一对一",
+          "level": 2,
+          "anchor": "通道与-ecu-不是一对一",
+          "keywords": [
+            "ComM",
+            "通道",
+            "RUN",
+            "FULL",
+            "降级"
+          ],
+          "text": "一个 ECU 可能管理多条 ComM 通道，每条通道有独立的许可与模式；ECU 处于 RUN 并不意味着每条网络都是 FULL。应用的可运行状态与具体网络的需求应当分开看，不能用一条通道的状态代表整个 ECU 的业务可用性。这是理解整车级可用性与降级策略的基础。"
+        }
+      ]
+    },
+    {
+      "id": "comm-e2e",
+      "title": "E2E 端到端保护",
+      "category": "communication",
+      "tags": [
+        "E2E",
+        "CRC",
+        "计数器",
+        "功能安全"
+      ],
+      "summary": "讲清 E2E 保护目标、CRC 与计数器分工、Profile 配置一致性与「机制不等于安全」。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/03-communication.md"
+      },
+      "refs": [
+        "src-e2e"
+      ],
+      "chunks": [
+        {
+          "id": "comm-e2e#1",
+          "heading": "E2E 保护的目标",
+          "level": 2,
+          "anchor": "e2e-保护的目标",
+          "keywords": [
+            "E2E",
+            "完整性",
+            "CRC",
+            "计数器",
+            "data ID"
+          ],
+          "text": "端到端保护 E2E 在通信两端之间检测数据完整性风险：报文被篡改、丢失、重复、乱序或延迟。E2E 通常在发送端附加 CRC 与计数器以及 data ID 等，接收端据此校验并做出接受、丢弃或上报的处理。它保护的是端到端的语义，而不仅是单段链路，因此跨越网关时依然有效。"
+        },
+        {
+          "id": "comm-e2e#2",
+          "heading": "CRC 与计数器的分工",
+          "level": 2,
+          "anchor": "crc-与计数器的分工",
+          "keywords": [
+            "CRC",
+            "计数器",
+            "丢帧",
+            "重复",
+            "乱序"
+          ],
+          "text": "E2E 里 CRC 负责检测数据是否被破坏，计数器负责检测报文是否丢失、重复或乱序；两者互补。接收端把计数器与上次比较：递增 1 为正常，跳变为丢帧，不变为重复，回退为乱序。结合 CRC 校验，接收端才能较可靠地判断数据是否可以信任，而不是只看某一次校验是否通过。"
+        },
+        {
+          "id": "comm-e2e#3",
+          "heading": "E2E 不是功能安全已经达成",
+          "level": 2,
+          "anchor": "e2e-不是功能安全已经达成",
+          "keywords": [
+            "E2E",
+            "功能安全",
+            "ISO 26262",
+            "安全目标",
+            "安全机制"
+          ],
+          "text": "E2E 是提升通信数据可信度的机制，它有助于功能安全，但本身不等于完成 ISO 26262 的安全目标。功能安全还需要危害分析、安全目标、安全机制组合（含看门狗、内存保护、安全状态等）、验证与确认。把 E2E 当作已经功能安全是常见误解，它只是可选安全机制中的一个环节。"
+        },
+        {
+          "id": "comm-e2e#4",
+          "heading": "E2E Profile 与配置一致性",
+          "level": 2,
+          "anchor": "e2e-profile-与配置一致性",
+          "keywords": [
+            "E2E",
+            "Profile",
+            "CRC",
+            "配置",
+            "接口"
+          ],
+          "text": "E2E 有不同的 Profile，定义计数器宽度、CRC 多项式与数据布局等参数，发送与接收两端必须使用同一个 Profile 与配置才能互认。配置不一致会导致接收端持续判定校验失败，看起来像通信坏了，其实是两端保护参数不匹配。因此跨 ECU 的 E2E 参数要与接口描述保持一致。"
+        },
+        {
+          "id": "comm-e2e#5",
+          "heading": "E2E 与 COM 的叠加关系",
+          "level": 2,
+          "anchor": "e2e-与-com-的叠加关系",
+          "keywords": [
+            "E2E",
+            "COM",
+            "RTE",
+            "PDU",
+            "ISO-TP"
+          ],
+          "text": "E2E 保护通常由 E2E 库与 COM/RTE 协作完成：发送前计算保护字段并放入信号或 PDU，接收后取出并校验。它不替代 COM 的打包，也不替代 ISO-TP 的分段，而是叠在应用数据之上的一层语义保护。理解这层叠加关系，才能解释为什么 PDU 结构里会多出 CRC 与计数器这些字段。"
+        }
+      ]
+    },
+    {
+      "id": "comm-canfd",
+      "title": "CAN FD 与经典 CAN",
+      "category": "communication",
+      "tags": [
+        "CAN FD",
+        "经典 CAN",
+        "帧数",
+        "兼容"
+      ],
+      "summary": "说明 CAN FD 的载荷扩展、对 ISO-TP 的实际影响、报文格式差异与迁移兼容性。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/03-communication.md"
+      },
+      "refs": [
+        "src-cantp"
+      ],
+      "chunks": [
+        {
+          "id": "comm-canfd#1",
+          "heading": "CAN FD 的载荷扩展",
+          "level": 2,
+          "anchor": "can-fd-的载荷扩展",
+          "keywords": [
+            "CAN FD",
+            "经典 CAN",
+            "64 字节",
+            "负载",
+            "帧数"
+          ],
+          "text": "CAN FD 把单帧数据域从经典 CAN 的 8 字节扩展到最多 64 字节，并采用更高的数据段码率，因此同一份负载所需帧数更少。它改变的是单帧容量与速率，不改变上层协议语义。诊断负载更长时，CAN FD 能显著减少分段帧，但分段、流控、确认这些协议规则依旧存在。"
+        },
+        {
+          "id": "comm-canfd#2",
+          "heading": "CAN FD 对 ISO-TP 的影响",
+          "level": 2,
+          "anchor": "can-fd-对-iso-tp-的影响",
+          "keywords": [
+            "CAN FD",
+            "ISO-TP",
+            "流控",
+            "Block Size",
+            "序号"
+          ],
+          "text": "在 ISO-TP 层，CAN FD 只是把单帧能装的数据变多，因此首帧与连续帧数量减少，流控节奏有所变化，但 Block Size、STmin、序号与超时机制不变。以为 CAN FD 能省略流控或提升 UDS 语义是错误的：它放宽的是数据长度，协议层的分段与确认规则仍然完整保留。"
+        },
+        {
+          "id": "comm-canfd#3",
+          "heading": "CAN FD 报文格式差异",
+          "level": 2,
+          "anchor": "can-fd-报文格式差异",
+          "keywords": [
+            "CAN FD",
+            "DLC",
+            "数据域",
+            "位时序",
+            "仲裁"
+          ],
+          "text": "CAN FD 帧在控制段引入了新的位与更长的 DLC 编码，支持更大数据域；这也影响位时序与采样点配置。教学实验只模拟数据长度对 ISO-TP 分帧的影响，不模拟位级时序、仲裁或误码。理解这一点可以避免把减少帧数误解成总线一定更快或更可靠。"
+        },
+        {
+          "id": "comm-canfd#4",
+          "heading": "CAN FD 迁移的兼容性",
+          "level": 2,
+          "anchor": "can-fd-迁移的兼容性",
+          "keywords": [
+            "CAN FD",
+            "经典 CAN",
+            "网关",
+            "兼容",
+            "收发器"
+          ],
+          "text": "经典 CAN 与 CAN FD 混跑需要网关做格式转换或网段隔离，不同节点对 FD 的支持能力不同。把 FD 引入既有网络时，要评估控制器、收发器与网关能力，并确认诊断测试仪也支持 FD。以为改一个开关就能让整网提速，往往忽略了这些兼容性约束。"
+        }
+      ]
+    },
+    {
+      "id": "storage-nvm-readall",
+      "title": "NvM 恢复策略与 ReadAll",
+      "category": "storage",
+      "tags": [
+        "NvM",
+        "NvM_ReadAll",
+        "恢复策略",
+        "门控"
+      ],
+      "summary": "讲清 ReadAll 的异步语义、回调方向、恢复策略选择与「请求受理≠已写入」。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/04-storage.md"
+      },
+      "refs": [
+        "src-nvm"
+      ],
+      "chunks": [
+        {
+          "id": "storage-nvm-readall#1",
+          "heading": "NvM 的层次位置",
+          "level": 2,
+          "anchor": "nvm-的层次位置",
+          "keywords": [
+            "NvM",
+            "NvM Block",
+            "MemIf",
+            "Fee",
+            "Fls"
+          ],
+          "text": "NvM（NVRAM Manager）是存储服务的顶层，管理非易失数据块 NvM Block，向上给 SWC、Dem、XCP 等提供读写接口，向下通过 MemIf 访问 Fee 或 Ea，再由 Fls 或 Eep 落到具体介质。NvM 负责块的调度、CRC、冗余与错误处理，应用不需要关心底层扇区与擦写细节。"
+        },
+        {
+          "id": "storage-nvm-readall#2",
+          "heading": "NvM_ReadAll 是异步的",
+          "level": 2,
+          "anchor": "nvm-readall-是异步的",
+          "keywords": [
+            "NvM_ReadAll",
+            "pending",
+            "NvM_MainFunction",
+            "NvM_GetErrorStatus",
+            "异步"
+          ],
+          "text": "NvM_ReadAll 是异步接口：它发起多块读取，但不同步交付所有数据，返回只表示请求已受理。要区分 pending、完成与失败，需要结合周期处理 NvM_MainFunction、配置的完成通知，或用 NvM_GetErrorStatus 以块号 0 查询整体请求结果。把函数已经返回当成数据已经恢复，是启动阶段最常见的理解错误之一。"
+        },
+        {
+          "id": "storage-nvm-readall#3",
+          "heading": "回调方向要辨认",
+          "level": 2,
+          "anchor": "回调方向要辨认",
+          "keywords": [
+            "NvM_JobEndNotification",
+            "BswM",
+            "回调",
+            "ReadAll",
+            "作业"
+          ],
+          "text": "NvM_JobEndNotification 是存储底层向 NvM 报告单次底层作业完成的回调，方向由下往上；而 NvM 向 BswM 反馈多块作业状态使用的是配置接口，例如 BswM_NvM_CurrentJobMode 之类。一个底层块读完，不代表整个 ReadAll 已完成。混淆回调方向，会让开发者误以为某个块完成就等于整体恢复就绪。"
+        },
+        {
+          "id": "storage-nvm-readall#4",
+          "heading": "恢复策略与门控是项目选择",
+          "level": 2,
+          "anchor": "恢复策略与门控是项目选择",
+          "keywords": [
+            "恢复策略",
+            "ROM 默认值",
+            "CRC",
+            "门控",
+            "RTE"
+          ],
+          "text": "NvM 恢复策略在失败时如何继续，属于项目策略而非唯一定式：可以因 CRC 失败采用 ROM 默认值继续、可以按块重要性分别处理、也可以将业务延后到数据就绪后再放行。本教学配置采用依赖持久数据的业务在数据就绪后运行的保守门控，但并不是所有版本或项目都必须把整个 RTE 延后到 ReadAll 之后。"
+        },
+        {
+          "id": "storage-nvm-readall#5",
+          "heading": "请求受理不等于已写入",
+          "level": 2,
+          "anchor": "请求受理不等于已写入",
+          "keywords": [
+            "NvM_WriteBlock",
+            "队列",
+            "提交",
+            "断电",
+            "持久化"
+          ],
+          "text": "写请求也一样：调用 NvM_WriteBlock 或让 Dem、XCP 提交持久化意图，只是把作业放进 NvM 队列受理，真正落到介质还要经历 MemIf、Fee、Fls、校验和提交。排队期间断电会丢失尚未提交的写入。把 NvM 请求已返回当成值已经持久化是错误的，必须等到提交完成的证据。"
+        },
+        {
+          "id": "storage-nvm-readall#6",
+          "heading": "启动读与运行写",
+          "level": 2,
+          "anchor": "启动读与运行写",
+          "keywords": [
+            "ReadAll",
+            "启动",
+            "运行",
+            "队列",
+            "数据就绪"
+          ],
+          "text": "启动阶段的 ReadAll 与运行阶段的按块读写是不同场景：ReadAll 面向一次性恢复全部必要块，通常被门控在业务放行前，只有数据就绪后才放开业务；运行期写入则依赖队列与周期处理逐块完成。理解这两个场景的差异，可以解释为什么启动时数据没准备好和运行中写入还没提交是两类不同的观察，需要分别定位。"
+        }
+      ]
+    },
+    {
+      "id": "storage-nvm-blocks",
+      "title": "NvM 块类型与 RAM 镜像",
+      "category": "storage",
+      "tags": [
+        "NvM",
+        "RAM block",
+        "冗余块",
+        "ROM 默认值"
+      ],
+      "summary": "说明 Native/Dataset 块、RAM block 与 ROM 默认值、冗余回退、配置一致性与写保护。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/04-storage.md"
+      },
+      "refs": [
+        "src-nvm"
+      ],
+      "chunks": [
+        {
+          "id": "storage-nvm-blocks#1",
+          "heading": "NvM 块类型",
+          "level": 2,
+          "anchor": "nvm-块类型",
+          "keywords": [
+            "NvM",
+            "Native",
+            "Dataset",
+            "冗余块",
+            "CRC"
+          ],
+          "text": "NvM 块可分为 Native 与 Dataset 等类型，也可配置为内部处理或由应用自行处理 CRC。冗余块 redundant 为同一逻辑数据保存多份，用于在单份损坏时回退。块类型决定了 NvM 的读写语义、CRC 处理方式与恢复策略，配置错误会让恢复行为与预期不符。"
+        },
+        {
+          "id": "storage-nvm-blocks#2",
+          "heading": "RAM 块与 ROM 默认值",
+          "level": 2,
+          "anchor": "ram-块与-rom-默认值",
+          "keywords": [
+            "RAM block",
+            "ROM 默认值",
+            "校验",
+            "恢复",
+            "介质"
+          ],
+          "text": "每个 NvM 块通常对应一块 RAM 镜像 RAM block，NvM 把介质读出的数据放进这块 RAM 供应用使用。块还可以配置 ROM 默认值：当介质中没有有效数据或校验失败时，可回退到 ROM 默认值继续运行。区分从介质恢复了原值与采用了 ROM 默认值很重要，二者都让数据可用，但来源与含义不同。"
+        },
+        {
+          "id": "storage-nvm-blocks#3",
+          "heading": "冗余块的回退",
+          "level": 2,
+          "anchor": "冗余块的回退",
+          "keywords": [
+            "冗余块",
+            "CRC",
+            "回退",
+            "存储占用",
+            "标定"
+          ],
+          "text": "冗余块保存同一数据的多份副本，当主副本 CRC 失败时 NvM 可尝试从副本回退恢复，从而提升关键数据的可用性。冗余增加存储占用与写入开销，因此通常只用于关键标定或安全相关数据。理解回退能力与代价的权衡，才能判断哪些块值得配置冗余，而不是对所有块一律冗余。"
+        },
+        {
+          "id": "storage-nvm-blocks#4",
+          "heading": "块长度与配置一致性",
+          "level": 2,
+          "anchor": "块长度与配置一致性",
+          "keywords": [
+            "NvM 块",
+            "长度",
+            "CRC",
+            "配置",
+            "迁移"
+          ],
+          "text": "NvM 块的配置，包括长度、CRC 类型、块号与管理类型，必须与生成代码和实际数据结构一致。若长度或 CRC 类型变更而未做迁移，旧数据会被判为无效而回退默认值。工程上变更块配置时要考虑数据迁移与版本兼容，否则看似保存成功的数据在下次上电时可能读不回来。"
+        },
+        {
+          "id": "storage-nvm-blocks#5",
+          "heading": "写保护与只读约束",
+          "level": 2,
+          "anchor": "写保护与只读约束",
+          "keywords": [
+            "写保护",
+            "请求被拒",
+            "误写",
+            "配置",
+            "刷写"
+          ],
+          "text": "NvM 可以为块配置写保护，使某些数据在运行期不可改写，只能由特定流程（如刷写或专用服务）更新。写保护让请求被拒绝而不是悄悄覆盖，便于保证关键配置不被误写。教学实验开启写保护后确认请求被拒且存储内容不变，这正体现了受控写入与任意可写的区别。"
+        }
+      ]
+    },
+    {
+      "id": "storage-fee-fls",
+      "title": "Fee/Fls 与 MemIf 抽象",
+      "category": "storage",
+      "tags": [
+        "Fee",
+        "Fls",
+        "MemIf",
+        "异步"
+      ],
+      "summary": "说明 Fee 模拟 EEPROM、Fls 执行擦写、MemIf 转发状态，以及异步流水线与提交。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/04-storage.md"
+      },
+      "refs": [
+        "src-fee",
+        "src-fls"
+      ],
+      "chunks": [
+        {
+          "id": "storage-fee-fls#1",
+          "heading": "Fee 与 Fls 的分工",
+          "level": 2,
+          "anchor": "fee-与-fls-的分工",
+          "keywords": [
+            "Fee",
+            "Fls",
+            "EEPROM",
+            "扇区",
+            "擦写"
+          ],
+          "text": "Fee（Flash EEPROM Emulation）在 Flash 上模拟 EEPROM 语义，负责把逻辑块映射到 Flash 扇区、管理擦写与地址分配；Fls（Flash Driver）负责实际的读、写、擦除与比较操作。Fee 让上层像访问 EEPROM 一样按块读写，而不必关心 Flash 必须先擦后写、扇区大小等硬件细节。这是存储抽象的关键一层。"
+        },
+        {
+          "id": "storage-fee-fls#2",
+          "heading": "MemIf 的抽象",
+          "level": 2,
+          "anchor": "memif-的抽象",
+          "keywords": [
+            "MemIf",
+            "NvM",
+            "Fee",
+            "Ea",
+            "初始化"
+          ],
+          "text": "MemIf（Memory Abstraction Interface）位于 NvM 与 Fee/Ea 之间，提供统一的读写状态接口，使 NvM 不必区分底层是 Flash 还是 EEPROM。MemIf 本身没有标准的 MemIf_Init 之类的初始化 API，它更多是一个转发与状态查询层。理解这一点可以避免凭模块名机械地给 MemIf 编一个初始化函数。"
+        },
+        {
+          "id": "storage-fee-fls#3",
+          "heading": "先擦后写与扇区管理",
+          "level": 2,
+          "anchor": "先擦后写与扇区管理",
+          "keywords": [
+            "Flash",
+            "擦除",
+            "扇区",
+            "寿命",
+            "垃圾回收"
+          ],
+          "text": "Flash 的物理特性决定写入前往往要先擦除整个扇区，而擦除按扇区粒度进行、寿命有限。Fee 通过把块顺序写入扇区、维护映射信息来避免频繁擦除，并在需要时做垃圾回收。这解释了为什么写入不是就地覆盖，而是追加记录再更新索引，也解释了为什么掉电时可能留下未完成的记录。"
+        },
+        {
+          "id": "storage-fee-fls#4",
+          "heading": "校验与提交",
+          "level": 2,
+          "anchor": "校验与提交",
+          "keywords": [
+            "校验",
+            "verify",
+            "commit",
+            "MemIf",
+            "Fee"
+          ],
+          "text": "一次写入通常要经过 NvM 到 MemIf、Fee、Fls 的多层下发，完成写后再做校验 verify，校验通过才把状态推进为提交 commit。校验失败时不能把新值当成有效数据，而应保留上一条有效记录。区分请求受理、实际写入、校验通过与提交完成这四个阶段，是理解存储可靠性的核心。"
+        },
+        {
+          "id": "storage-fee-fls#5",
+          "heading": "异步流水线",
+          "level": 2,
+          "anchor": "异步流水线",
+          "keywords": [
+            "异步",
+            "主函数",
+            "NvM",
+            "Fee",
+            "流水线"
+          ],
+          "text": "存储服务是异步流水线：上层发起请求后，真正的工作由各层的主函数在后续周期中逐步推进。因此界面或日志里应能看到 NvM 作业、MemIf 状态、Fee 操作与 Fls 操作的推进过程，而不是一次函数调用瞬间完成。把存储当同步操作，会误判已经写完，在掉电测试中尤其容易出错。"
+        }
+      ]
+    },
+    {
+      "id": "storage-crc-power",
+      "title": "CRC 失败、掉电与写保护",
+      "category": "storage",
+      "tags": [
+        "CRC",
+        "掉电",
+        "写保护",
+        "恢复"
+      ],
+      "summary": "说明校验失败回退、写入提交边界、写保护收益、冗余裁决与数据来源可解释性。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/04-storage.md"
+      },
+      "refs": [
+        "src-nvm"
+      ],
+      "chunks": [
+        {
+          "id": "storage-crc-power#1",
+          "heading": "CRC 失败的回退",
+          "level": 2,
+          "anchor": "crc-失败的回退",
+          "keywords": [
+            "CRC",
+            "回退",
+            "冗余",
+            "ROM 默认值",
+            "告警"
+          ],
+          "text": "当读出的数据 CRC 校验失败，说明记录已损坏或未完整写入，NvM 应把它判为无效，并可回退到冗余副本或 ROM 默认值，同时记录告警。关键是不要用一份校验失败的数据继续业务，也不要假装原值已恢复成功。教学场景里的 CRC 失败会明确提示数据来自默认值，以区分恢复成功与降级。"
+        },
+        {
+          "id": "storage-crc-power#2",
+          "heading": "掉电边界",
+          "level": 2,
+          "anchor": "掉电边界",
+          "keywords": [
+            "掉电",
+            "提交",
+            "CRC",
+            "恢复",
+            "旧值"
+          ],
+          "text": "掉电是存储可靠性的关键考验：在写入过程中断电，可能留下半写记录或未提交状态。下次上电时，NvM 依据 CRC 与提交标记判断记录是否有效，无效则回退。因此写请求已受理与掉电后仍在之间隔着提交边界。理解这条边界，才能解释为什么推进很短时间后断电恢复的是旧值，而推进足够久后才是新值。"
+        },
+        {
+          "id": "storage-crc-power#3",
+          "heading": "写保护的收益",
+          "level": 2,
+          "anchor": "写保护的收益",
+          "keywords": [
+            "写保护",
+            "关键配置",
+            "标定",
+            "请求被拒",
+            "更新"
+          ],
+          "text": "写保护能防止关键配置被误写或在不该写的窗口被覆盖。开启后写入请求被拒绝，存储内容保持不变，这对标定、安全相关参数尤其重要。写保护不是万能：它需要在正确的时间窗口内解除才能正常更新，否则合法更新也会被拒。设计时要权衡保护强度与可维护性，并明确谁能解除保护。"
+        },
+        {
+          "id": "storage-crc-power#4",
+          "heading": "冗余的抗损与裁决",
+          "level": 2,
+          "anchor": "冗余的抗损与裁决",
+          "keywords": [
+            "冗余",
+            "一致性",
+            "提交标记",
+            "序列号",
+            "掉电"
+          ],
+          "text": "冗余与双份记录提升了抗损能力：一份记录损坏时还能从另一份恢复。但冗余也带来一致性挑战，两份内容若因掉电不同步，需要有一条确定的裁决规则，例如以提交标记与序列号较新的为准。理解裁决规则，才能预测某次掉电后最终会恢复到哪一份。缺少确定裁决规则时，两份记录可能都不可信。"
+        },
+        {
+          "id": "storage-crc-power#5",
+          "heading": "数据来源要可解释",
+          "level": 2,
+          "anchor": "数据来源要可解释",
+          "keywords": [
+            "数据来源",
+            "ROM 默认值",
+            "冗余",
+            "恢复",
+            "可信度"
+          ],
+          "text": "观察到某块数据可用时，应能说清它的数据来源：是从介质恢复的原值、从冗余副本恢复、还是回退到 ROM 默认值。不同来源对应不同的可信度与后续动作。把数据可用笼统当成恢复成功，会在故障排查中掩盖真实问题。教学界面用不同提示区分这些来源，正是为了让这种区分可见。"
+        }
+      ]
+    },
+    {
+      "id": "storage-gc",
+      "title": "双扇区 GC 与一致性",
+      "category": "storage",
+      "tags": [
+        "Fee",
+        "GC",
+        "双扇区",
+        "掉电"
+      ],
+      "summary": "解释垃圾回收为何必要、双扇区轮换顺序、GC 期间的写入延迟与掉电交界。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/04-storage.md"
+      },
+      "refs": [
+        "src-fee"
+      ],
+      "chunks": [
+        {
+          "id": "storage-gc#1",
+          "heading": "为什么需要 GC",
+          "level": 2,
+          "anchor": "为什么需要-gc",
+          "keywords": [
+            "Flash",
+            "擦除",
+            "Fee",
+            "垃圾回收",
+            "GC"
+          ],
+          "text": "Flash 写入前要擦除、擦除按扇区进行且寿命有限，因此 Fee 采用追加写与索引的方式减少擦除。当活动扇区写满或有效记录分散时，需要垃圾回收 GC：把仍有效的记录复制到备用扇区，再切换活动扇区并擦除旧扇区。GC 是长期运行的必然成本，理解它才能解释写入延迟的波动。"
+        },
+        {
+          "id": "storage-gc#2",
+          "heading": "双扇区轮换",
+          "level": 2,
+          "anchor": "双扇区轮换",
+          "keywords": [
+            "双扇区",
+            "GC",
+            "活动扇区",
+            "备用扇区",
+            "掉电"
+          ],
+          "text": "典型的双扇区方案用一个活动扇区写入、一个备用扇区准备。触发 GC 时，Fee 先把活动扇区中的有效记录复制到备用扇区，校验通过后切换活动扇区，再擦除旧扇区。这个先复制、再切换、后擦除的顺序保证任何时刻都至少有一份完整数据，是掉电安全的常见做法。"
+        },
+        {
+          "id": "storage-gc#3",
+          "heading": "GC 期间的写入延迟",
+          "level": 2,
+          "anchor": "gc-期间的写入延迟",
+          "keywords": [
+            "GC",
+            "写入",
+            "排队",
+            "延迟",
+            "寿命"
+          ],
+          "text": "GC 占用存储带宽与时间，期间新的写入可能排队或延迟完成。因此排队多次写入会触发 GC，表现为某些请求完成更慢。这属于设计权衡而非异常：减少擦除次数、延长寿命的代价是偶发的较长写入延迟。理解这一点，才不会把 GC 引起的延迟误判为故障，也不会误以为存储卡死。"
+        },
+        {
+          "id": "storage-gc#4",
+          "heading": "GC 与掉电的交界",
+          "level": 2,
+          "anchor": "gc-与掉电的交界",
+          "keywords": [
+            "GC",
+            "掉电",
+            "提交标记",
+            "索引",
+            "一致性"
+          ],
+          "text": "GC 在复制尚未完成时掉电，是最危险的交界之一：可能已写入部分新记录却还没切换活动扇区。可靠的实现用提交标记与索引保证下次上电时能判断哪份数据完整，从而恢复到一致状态。把 GC 当成后台无害操作，会低估它在掉电场景下的复杂性与对一致性的要求。"
+        }
+      ]
+    },
+    {
+      "id": "os-scheduling",
+      "title": "固定优先级抢占与调度表",
+      "category": "os",
+      "tags": [
+        "OS",
+        "固定优先级",
+        "抢占",
+        "调度表"
+      ],
+      "summary": "讲清固定优先级抢占、调度表同步、基本/扩展任务差异、激活终止与栈负载问题。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/05-os.md"
+      },
+      "refs": [
+        "src-os"
+      ],
+      "chunks": [
+        {
+          "id": "os-scheduling#1",
+          "heading": "固定优先级抢占",
+          "level": 2,
+          "anchor": "固定优先级抢占",
+          "keywords": [
+            "固定优先级",
+            "抢占",
+            "任务",
+            "优先级",
+            "就绪"
+          ],
+          "text": "AUTOSAR OS 采用固定优先级抢占式调度：每个任务有静态优先级，更高优先级任务一旦就绪就抢占当前运行的低优先级任务。任务状态包括 running、ready、waiting、suspended 等。固定优先级保证行为可分析，但也意味着高优先级任务过密会饿死低优先级任务，因此优先级分配与 CPU 负载评估很重要。"
+        },
+        {
+          "id": "os-scheduling#2",
+          "heading": "调度表的作用",
+          "level": 2,
+          "anchor": "调度表的作用",
+          "keywords": [
+            "调度表",
+            "Schedule Table",
+            "同步计数器",
+            "抢占",
+            "同步点"
+          ],
+          "text": "调度表 Schedule Table 按时间自动激活绑定在表上的任务或设置事件，由同步计数器推进，可在指定同步点对齐。它适合有严格时间序列的周期性处理，与固定优先级抢占并行工作：调度表决定何时到期，抢占规则决定谁现在能跑。两者结合能表达复杂时序，但也增加了同步与抖动的分析难度。"
+        },
+        {
+          "id": "os-scheduling#3",
+          "heading": "基本任务与扩展任务",
+          "level": 2,
+          "anchor": "基本任务与扩展任务",
+          "keywords": [
+            "基本任务",
+            "扩展任务",
+            "SetEvent",
+            "waiting",
+            "事件"
+          ],
+          "text": "基本任务 Basic Task 只能在运行与挂起之间切换，不能等待事件；扩展任务 Extended Task 可以等待事件，进入 waiting 状态，被 SetEvent 唤醒后回到 ready。周期处理常用基本任务，需要等待外部事件的处理常用扩展任务。选错任务类型会导致无法表达等待语义，或引入不必要的阻塞。"
+        },
+        {
+          "id": "os-scheduling#4",
+          "heading": "任务的激活与终止",
+          "level": 2,
+          "anchor": "任务的激活与终止",
+          "keywords": [
+            "激活",
+            "TerminateTask",
+            "调度表",
+            "可调度性",
+            "阻塞"
+          ],
+          "text": "任务的激活方式包括自动启动、被其它任务或 ISR 激活、以及由调度表激活。任务结束时调用 TerminateTask 让出处理器，若任务卡在忙等则会破坏可调度性分析。AUTOSAR OS 要求任务有明确的终止点或阻塞点，以便调度器接管；无限循环且不让出的任务会拖垮整个系统的时间行为。"
+        },
+        {
+          "id": "os-scheduling#5",
+          "heading": "栈与优先级反转",
+          "level": 2,
+          "anchor": "栈与优先级反转",
+          "keywords": [
+            "栈",
+            "栈溢出",
+            "优先级反转",
+            "资源",
+            "负载"
+          ],
+          "text": "每个任务与 ISR 需要独立的栈空间，栈大小与最大调用深度、局部变量量相关，配置过小会导致栈溢出。负载方面，固定优先级调度的经典问题是优先级反转，共享资源会让高优先级被低优先级间接阻塞，需要用资源协议或优先级提升缓解。栈与负载分析是量产工程里必不可少的一步。"
+        }
+      ]
+    },
+    {
+      "id": "os-isr",
+      "title": "Cat1/Cat2 中断、资源与事件",
+      "category": "os",
+      "tags": [
+        "OS",
+        "ISR",
+        "Cat1",
+        "Cat2",
+        "资源"
+      ],
+      "summary": "区分 Cat1/Cat2 ISR、说明 ISR 返回调度、资源临界区与 ISR 任务职责分工。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/05-os.md"
+      },
+      "refs": [
+        "src-os"
+      ],
+      "chunks": [
+        {
+          "id": "os-isr#1",
+          "heading": "Cat1 与 Cat2 中断",
+          "level": 2,
+          "anchor": "cat1-与-cat2-中断",
+          "keywords": [
+            "Cat1",
+            "Cat2",
+            "ISR",
+            "SetEvent",
+            "中断"
+          ],
+          "text": "AUTOSAR OS 区分两类中断：Category 1（Cat1）ISR 不经过 OS、不调用 OS 服务，开销最小，常用于极短且时间关键的硬件事件；Category 2（Cat2）ISR 由 OS 管理，可以调用部分 OS 服务，如激活任务、SetEvent，返回时触发调度决策。把 Cat1 当成可以随意调 OS 服务，会导致未定义行为。"
+        },
+        {
+          "id": "os-isr#2",
+          "heading": "ISR 返回与调度",
+          "level": 2,
+          "anchor": "isr-返回与调度",
+          "keywords": [
+            "Cat2",
+            "ISR",
+            "SetEvent",
+            "调度",
+            "抢占"
+          ],
+          "text": "Cat2 ISR 执行完毕返回时，OS 会检查是否有更高优先级任务因此就绪，如有则发生抢占。这就是为什么 ISR 里 SetEvent 能唤醒扩展任务：事件把任务置为 ready，返回路径再做调度。理解这条中断、事件、任务的链，才能解释一次硬件中断如何最终变成某个任务被执行。"
+        },
+        {
+          "id": "os-isr#3",
+          "heading": "资源与临界区",
+          "level": 2,
+          "anchor": "资源与临界区",
+          "keywords": [
+            "GetResource",
+            "ReleaseResource",
+            "临界区",
+            "资源协议",
+            "竞争"
+          ],
+          "text": "当任务或 ISR 需要访问共享数据时，用 GetResource 与 ReleaseResource 声明临界区，OS 在执行临界区期间按配置提升到资源上限优先级或关中断，避免竞争。资源协议能防止并发访问破坏数据，但滥用会让高优先级任务被长时间阻塞。合理划分临界区粒度是实时系统的常见功课。"
+        },
+        {
+          "id": "os-isr#4",
+          "heading": "中断屏蔽与响应性",
+          "level": 2,
+          "anchor": "中断屏蔽与响应性",
+          "keywords": [
+            "关中断",
+            "屏蔽",
+            "中断优先级",
+            "响应性",
+            "时序"
+          ],
+          "text": "关中断或长时间屏蔽会延迟 ISR 响应，影响时序确定性。AUTOSAR OS 用中断优先级与屏蔽机制管理嵌套与延迟，但屏蔽窗口应尽量短。把大段处理放进关中断区域，会牺牲系统的响应性，即使逻辑正确也可能违反时序要求。这是实时性设计中需要权衡的典型点。"
+        },
+        {
+          "id": "os-isr#5",
+          "heading": "ISR 与任务的职责分工",
+          "level": 2,
+          "anchor": "isr-与任务的职责分工",
+          "keywords": [
+            "ISR",
+            "事件",
+            "任务",
+            "中断延迟",
+            "职责"
+          ],
+          "text": "常见做法是让 ISR 只做最少的事，例如读取硬件、清标志、发事件，把较重逻辑放到被唤醒的任务里执行。这样既缩短中断处理时间，又让复杂处理可在允许调用更多服务的任务上下文中进行。把重逻辑直接塞进 ISR，不仅拉长中断延迟，还可能因在 Cat1 中误调 OS 服务而出错。"
+        }
+      ]
+    },
+    {
+      "id": "os-timing-protection",
+      "title": "时间保护机制",
+      "category": "os",
+      "tags": [
+        "OS",
+        "时间保护",
+        "WCET",
+        "执行预算"
+      ],
+      "summary": "讲清时间保护的执行预算与到达间隔监督、与 WCET 和 WdgM 的关系及启用代价。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/05-os.md"
+      },
+      "refs": [
+        "src-os"
+      ],
+      "chunks": [
+        {
+          "id": "os-timing-protection#1",
+          "heading": "时间保护是什么",
+          "level": 2,
+          "anchor": "时间保护是什么",
+          "keywords": [
+            "时间保护",
+            "执行预算",
+            "到达间隔",
+            "错误钩子",
+            "任务"
+          ],
+          "text": "时间保护 Timing Protection 监控任务与 ISR 的执行时间预算和到达间隔，防止某个实体超时运行或过快重复激活而拖垮系统。它为每个受保护对象配置执行预算与最小、最大到达间隔，一旦越界，OS 依配置触发保护动作，例如调用错误钩子或终止任务。它把时序正确性从设计约束变成运行时可检测的机制。"
+        },
+        {
+          "id": "os-timing-protection#2",
+          "heading": "执行预算与 WCET",
+          "level": 2,
+          "anchor": "执行预算与-wcet",
+          "keywords": [
+            "执行预算",
+            "WCET",
+            "时间保护",
+            "可调度性",
+            "超时"
+          ],
+          "text": "执行预算通常约等于或略高于 WCET（最坏情况执行时间）。预算设得过大失去保护意义，设得过小则误报。因此时间保护依赖可信的 WCET 分析。它不能替代 WCET 分析，而是把分析结果固化成运行时守卫；两者配合，才能既保证可调度性又能捕捉异常的超时行为。"
+        },
+        {
+          "id": "os-timing-protection#3",
+          "heading": "到达间隔的监督",
+          "level": 2,
+          "anchor": "到达间隔的监督",
+          "keywords": [
+            "到达间隔",
+            "激活",
+            "中断风暴",
+            "时间保护",
+            "时序"
+          ],
+          "text": "到达间隔监督关注激活频率：若某任务在最小间隔内被重复激活，可能意味着中断风暴或逻辑错误；若超过最大间隔未到达，可能意味着上游缺失。时间保护把这两种偏差都变成可检测事件，帮助定位那些不表现为崩溃、却破坏时序的隐性问题。"
+        },
+        {
+          "id": "os-timing-protection#4",
+          "heading": "与 WdgM 的差别",
+          "level": 2,
+          "anchor": "与-wdgm-的差别",
+          "keywords": [
+            "时间保护",
+            "WdgM",
+            "看门狗",
+            "alive",
+            "监督"
+          ],
+          "text": "时间保护关注任务与 ISR 级的执行和到达预算，属于 OS 机制；WdgM（Watchdog Manager）关注的是功能级存活：检查受监督实体是否按时报告 alive，并在失败时触发看门狗复位或降级。二者都关乎时序，但层次不同，前者防单实体失控，后者防整体功能停滞，工程上常配合使用。"
+        },
+        {
+          "id": "os-timing-protection#5",
+          "heading": "启用时间保护的代价",
+          "level": 2,
+          "anchor": "启用时间保护的代价",
+          "keywords": [
+            "时间保护",
+            "配置",
+            "开销",
+            "保护动作",
+            "鲁棒性"
+          ],
+          "text": "启用时间保护需要配置每个受保护对象并承担少量运行时开销与测量误差，还要处理保护动作带来的系统行为，例如任务被终止后如何恢复。它不是免费的开关，需要在诊断能力、系统鲁棒性与额外复杂度之间权衡。教学实验只讲语义，不实现真实 OS 的保护域与硬件计时，不能据此当作量产配置。"
+        }
+      ]
+    },
+    {
+      "id": "os-multicore",
+      "title": "OS-Application、IOC 与 Spinlock",
+      "category": "os",
+      "tags": [
+        "OS",
+        "OS-Application",
+        "IOC",
+        "Spinlock"
+      ],
+      "summary": "说明 OS-Application 边界、跨核 IOC 通信、Spinlock 用途、核归属与共享初始化顺序。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/05-os.md"
+      },
+      "refs": [
+        "src-os"
+      ],
+      "chunks": [
+        {
+          "id": "os-multicore#1",
+          "heading": "OS-Application 的边界",
+          "level": 2,
+          "anchor": "os-application-的边界",
+          "keywords": [
+            "OS-Application",
+            "任务",
+            "ISR",
+            "保护",
+            "核"
+          ],
+          "text": "AUTOSAR OS 用 OS-Application 划分软件单元，每个 OS-Application 可以有自己的任务、ISR、报警与资源，并可运行在不同核上。OS-Application 是信任与保护的基本单位：跨 OS-Application 的访问需要受控接口，某些服务仅允许在特定类型的 OS-Application 内调用。它把谁拥有什么显式化。"
+        },
+        {
+          "id": "os-multicore#2",
+          "heading": "IOC 的跨核通信",
+          "level": 2,
+          "anchor": "ioc-的跨核通信",
+          "keywords": [
+            "IOC",
+            "OS-Application",
+            "跨核",
+            "队列",
+            "同步"
+          ],
+          "text": "IOC（Inter-OS-Application Communicator）用于在同一核或不同核的 OS-Application 之间传递数据，消息通过队列或缓冲投递，由发送与接收侧的调用配合完成。它替代了跨核直接共享变量的不安全做法，让数据传递有明确的同步点与边界。理解 IOC，才能解释跨核数据为什么要在接收端任务运行时才被处理。"
+        },
+        {
+          "id": "os-multicore#3",
+          "heading": "Spinlock 的用途",
+          "level": 2,
+          "anchor": "spinlock-的用途",
+          "keywords": [
+            "Spinlock",
+            "多核",
+            "临界区",
+            "自旋",
+            "优先级反转"
+          ],
+          "text": "Spinlock 用于多核间保护短小的共享临界区：一个核获取锁后，其它核自旋等待直到释放。它适合极短的临界区，因为自旋会消耗 CPU；临界区过长会浪费算力并增加优先级反转风险。Spinlock 与单核资源协议解决的是不同范围的问题，多核共享资源必须用能跨核同步的机制。"
+        },
+        {
+          "id": "os-multicore#4",
+          "heading": "核归属与启动",
+          "level": 2,
+          "anchor": "核归属与启动",
+          "keywords": [
+            "多核",
+            "StartCore",
+            "StartOS",
+            "核归属",
+            "运行数据"
+          ],
+          "text": "多核 OS 共享配置与大量代码，但每个核有自己的运行数据：任务表、栈、中断向量与调度状态。主核负责共享初始化并调用 StartCore 启动其它核，被启动的核各自调用 StartOS。任务与 ISR 归属于某核，不能随意在另一核运行。搞清核归属，才能避免把单核假设错误地套到多核上。"
+        },
+        {
+          "id": "os-multicore#5",
+          "heading": "共享资源的初始化顺序",
+          "level": 2,
+          "anchor": "共享资源的初始化顺序",
+          "keywords": [
+            "多核",
+            "共享资源",
+            "初始化",
+            "同步",
+            "启动屏障"
+          ],
+          "text": "多核启动时，共享时钟、RAM 与外设在主核早期初始化，其它核在依赖就绪后才被拉起。若某核过早访问未初始化的共享资源，会得到不确定结果。因此核间需要明确的同步与顺序约定，通常由启动屏障保证所有核到达某一就绪点后再统一放行。共享资源的初始化顺序是多核启动正确性的关键。"
+        }
+      ]
+    },
+    {
+      "id": "os-startup-barrier",
+      "title": "多核启动屏障",
+      "category": "os",
+      "tags": [
+        "多核",
+        "启动屏障",
+        "同步",
+        "超时"
+      ],
+      "summary": "解释启动屏障为何必要、屏障的超时与降级、屏障后的统一放行以及教学伪 API 的边界。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/05-os.md"
+      },
+      "refs": [
+        "src-os"
+      ],
+      "chunks": [
+        {
+          "id": "os-startup-barrier#1",
+          "heading": "启动屏障的必要性",
+          "level": 2,
+          "anchor": "启动屏障的必要性",
+          "keywords": [
+            "启动屏障",
+            "多核",
+            "就绪点",
+            "同步",
+            "共享资源"
+          ],
+          "text": "多核并行启动时，某些后续工作必须等所有核都到达就绪点才能开始，例如放开依赖通信核的业务、统一启动时间基准。启动屏障就是用一组同步点让各核在此汇合，先到者等待、最后者放行。没有屏障，先完成的核可能提前使用尚未就绪的共享资源或服务。"
+        },
+        {
+          "id": "os-startup-barrier#2",
+          "heading": "屏障与超时降级",
+          "level": 2,
+          "anchor": "屏障与超时降级",
+          "keywords": [
+            "屏障",
+            "超时",
+            "降级",
+            "复位",
+            "启动超时"
+          ],
+          "text": "屏障等待需要超时与失败策略：若某个核启动超时，主核不能无限等待，而应进入已定义好的降级或复位路径。教学故障场景让一个核启动超时，其它核可到局部就绪，但屏障阻止依赖该核的任务被错误放行。这说明屏障不仅是同步点，也是把部分失败转成受控状态的位置。"
+        },
+        {
+          "id": "os-startup-barrier#3",
+          "heading": "屏障之后的统一放行",
+          "level": 2,
+          "anchor": "屏障之后的统一放行",
+          "keywords": [
+            "屏障",
+            "RTE",
+            "BSW",
+            "并行",
+            "就绪"
+          ],
+          "text": "越过屏障后，各核才统一推进依赖全局就绪的工作：启动 RTE 事件、放开 BSW 周期处理、对外声明 ECU 就绪。屏障之前的初始化应是局部且可并行的，屏障之后的动作则依赖全局一致。把这两段职责分清，能解释为什么某些初始化可以并行、某些必须串行在屏障之后。"
+        },
+        {
+          "id": "os-startup-barrier#4",
+          "heading": "教学伪 API 的边界",
+          "level": 2,
+          "anchor": "教学伪-api-的边界",
+          "keywords": [
+            "屏障",
+            "AUTOSAR",
+            "缓存一致性",
+            "WCET",
+            "多核"
+          ],
+          "text": "教学里用 StartupBarrier_WaitAll 之类的名字表达屏障，但这些是项目级伪 API，不是 AUTOSAR 标准接口。真实多核设计还要处理内存归属、缓存一致性、启动超时、安全机制、锁顺序、WCET 与关机路径，远不是一次等待调用能概括的。理解这一边界，才不会把教学示意当成可直接生成的多核配置。"
+        }
+      ]
+    },
+    {
+      "id": "xcp-fundamentals",
+      "title": "XCP 基础与 CRO/DTO",
+      "category": "xcp",
+      "tags": [
+        "XCP",
+        "CRO",
+        "DTO",
+        "标定"
+      ],
+      "summary": "说明 XCP 定位、主从结构与 CRO/DTO 方向、连接与标定页、测量与标定的区别。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/06-xcp.md"
+      },
+      "refs": [
+        "src-xcp"
+      ],
+      "chunks": [
+        {
+          "id": "xcp-fundamentals#1",
+          "heading": "XCP 的定位",
+          "level": 2,
+          "anchor": "xcp-的定位",
+          "keywords": [
+            "XCP",
+            "测量",
+            "标定",
+            "传输层",
+            "CAN"
+          ],
+          "text": "XCP（Universal Measurement and Calibration Protocol）是测量与标定协议，可以在 ECU 运行时读取内部变量、修改标定量、采集高速数据流。它工作在传输层之上，可跑在 CAN、CAN FD、以太网等多种总线上。XCP 不是诊断协议，它面向开发与标定场景，而不是量产故障诊断。"
+        },
+        {
+          "id": "xcp-fundamentals#2",
+          "heading": "主从与 CRO/DTO",
+          "level": 2,
+          "anchor": "主从与-cro-dto",
+          "keywords": [
+            "XCP",
+            "master",
+            "slave",
+            "CRO",
+            "DTO"
+          ],
+          "text": "XCP 是主从结构：标定工具 master 发命令，ECU slave 响应。命令通过 CRO（Command Receive Object）发送，响应与数据通过 DTO（Data Transfer Object）返回。一次交互就是 master 写 CRO、slave 处理后回 DTO。理解 CRO 与 DTO 的方向，是读懂 XCP 报文流的第一步。"
+        },
+        {
+          "id": "xcp-fundamentals#3",
+          "heading": "连接与标定页",
+          "level": 2,
+          "anchor": "连接与标定页",
+          "keywords": [
+            "CONNECT",
+            "标定页",
+            "标定数据",
+            "会话",
+            "ECU"
+          ],
+          "text": "XCP 会话通常从 CONNECT 开始，协商通信参数与资源，然后可以切换到某个标定页 calibration page。标定页决定当前使用哪套标定数据：可以在多套标定之间切换而不改代码。断开后 ECU 依配置可能保留或丢弃未保存的修改，因此改了就生效与改了就持久是两件不同的事。"
+        },
+        {
+          "id": "xcp-fundamentals#4",
+          "heading": "测量与标定的区别",
+          "level": 2,
+          "anchor": "测量与标定的区别",
+          "keywords": [
+            "测量",
+            "标定",
+            "标定量",
+            "RAM",
+            "控制"
+          ],
+          "text": "测量是读取 ECU 内部变量，如传感器值、内部状态，用于观察；标定是修改标定量以改变 ECU 行为，如增益、阈值。测量通常是只读采集，标定则涉及写入 RAM 中的标定对象。二者共享同一套 XCP 通道，但语义与风险不同，标定写入尤其需要谨慎，避免影响运行中的控制逻辑。"
+        },
+        {
+          "id": "xcp-fundamentals#5",
+          "heading": "XCP 与诊断的边界",
+          "level": 2,
+          "anchor": "xcp-与诊断的边界",
+          "keywords": [
+            "XCP",
+            "UDS",
+            "诊断",
+            "标定",
+            "会话"
+          ],
+          "text": "XCP 与 UDS 都跑在同一类总线上，但目标不同：UDS 面向量产诊断与刷写，XCP 面向开发期测量与标定。把 XCP 当成诊断服务、或把 UDS 的会话安全机制直接套到 XCP，都是概念混淆。真实项目中二者可能并存，但各自的访问控制、安全要求与使用场景需要分别定义。"
+        }
+      ]
+    },
+    {
+      "id": "xcp-daq",
+      "title": "DAQ 列表与采样",
+      "category": "xcp",
+      "tags": [
+        "XCP",
+        "DAQ",
+        "采样",
+        "总线负载"
+      ],
+      "summary": "讲清 DAQ 列表机制、静态/动态配置、采样周期与总线负载、一致性以及资源限制。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/06-xcp.md"
+      },
+      "refs": [
+        "src-xcp"
+      ],
+      "chunks": [
+        {
+          "id": "xcp-daq#1",
+          "heading": "DAQ 列表",
+          "level": 2,
+          "anchor": "daq-列表",
+          "keywords": [
+            "DAQ",
+            "采集",
+            "采样周期",
+            "DTO",
+            "变量"
+          ],
+          "text": "DAQ（Data AcQuisition）列表是 XCP 的高效采集机制：master 预先定义要采集的变量、采样周期与打包方式，slave 按周期把样本打包进 DTO 主动发回，而不是每次命令才读一个变量。这让高频采集成为可能，是标定与测试中观察曲线的主要手段。一个列表可包含多个通道，各自有地址与长度。"
+        },
+        {
+          "id": "xcp-daq#2",
+          "heading": "静态与动态 DAQ",
+          "level": 2,
+          "anchor": "静态与动态-daq",
+          "keywords": [
+            "DAQ",
+            "静态",
+            "动态",
+            "通道",
+            "地址"
+          ],
+          "text": "DAQ 列表可以在启动时静态配置，也可以在运行时动态建立：master 发送命令分配列表、添加通道、启动采集。动态配置更灵活，但需要 slave 支持相应资源。无论哪种，都要在采集前把变量地址解析为绝对地址，并确保这些地址在运行期间有效。理解配置阶段与运行阶段的区别，才能排查采集到的是旧值或无效值这类问题。"
+        },
+        {
+          "id": "xcp-daq#3",
+          "heading": "采集周期与总线负载",
+          "level": 2,
+          "anchor": "采集周期与总线负载",
+          "keywords": [
+            "DAQ",
+            "采样周期",
+            "事件通道",
+            "总线负载",
+            "应用报文"
+          ],
+          "text": "DAQ 的采样周期与事件通道决定数据发送频率，周期越短、变量越多，总线负载越高，可能挤占应用报文。因此标定时要权衡采样密度与总线容量，必要时用事件触发或分组降低负载。把 DAQ 当成想采多快就多快，会忽视总线是共享资源这一现实。"
+        },
+        {
+          "id": "xcp-daq#4",
+          "heading": "DAQ 与测量一致性",
+          "level": 2,
+          "anchor": "daq-与测量一致性",
+          "keywords": [
+            "DAQ",
+            "一致性",
+            "时间戳",
+            "双缓冲",
+            "采样"
+          ],
+          "text": "DAQ 的样本在从变量复制到 DTO 的过程中存在时间戳与一致性问题：若变量在复制期间被修改，可能采到不一致的组合。高质量实现用锁或双缓冲保证一致快照。教学实验用固定周期采样演示概念，实际标定中要关注这种一致性，否则曲线上的异常跳变可能来自采集机制而非被测对象。"
+        },
+        {
+          "id": "xcp-daq#5",
+          "heading": "DAQ 的资源限制",
+          "level": 2,
+          "anchor": "daq-的资源限制",
+          "keywords": [
+            "DAQ",
+            "资源",
+            "缓冲区",
+            "丢样本",
+            "通道"
+          ],
+          "text": "ECU 的 DAQ 资源，包括列表数、通道数与缓冲区，都是有限的，配置过多会超出能力，导致启动采集失败或丢样本。因此标定前应规划采集内容，优先关键变量。理解资源上限，能避免为什么某些通道没有数据这类问题被误判为软件缺陷。"
+        }
+      ]
+    },
+    {
+      "id": "xcp-memory",
+      "title": "SHORT_UPLOAD、A2L 与地址",
+      "category": "xcp",
+      "tags": [
+        "XCP",
+        "SHORT_UPLOAD",
+        "A2L",
+        "地址"
+      ],
+      "summary": "说明 SHORT_UPLOAD 用途、标定量存储位置、A2L 元数据作用、地址布局同步与访问安全。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/06-xcp.md"
+      },
+      "refs": [
+        "src-xcp"
+      ],
+      "chunks": [
+        {
+          "id": "xcp-memory#1",
+          "heading": "SHORT_UPLOAD 的用途",
+          "level": 2,
+          "anchor": "short-upload-的用途",
+          "keywords": [
+            "SHORT_UPLOAD",
+            "地址",
+            "长度",
+            "标定量",
+            "采集"
+          ],
+          "text": "SHORT_UPLOAD 是 XCP 的一种短命令：在一次命令中直接指定地址与长度，slave 把对应内存内容作为响应返回，无需预先配置 DAQ 列表。它适合临时读取少量数据或确认某个标定量当前值。因为它每次都要发命令，频率不高，通常用于交互式检查而非高频采集。"
+        },
+        {
+          "id": "xcp-memory#2",
+          "heading": "标定量的存储位置",
+          "level": 2,
+          "anchor": "标定量的存储位置",
+          "keywords": [
+            "标定量",
+            "RAM",
+            "Flash",
+            "NvM",
+            "复位"
+          ],
+          "text": "标定量通常存放在 RAM 中供运行使用，最终来源可能是 Flash 中的初始值或 NvM 保存的已提交值。XCP 修改的是 RAM 中的副本，复位后若未保存，会回到上次已提交或默认的值。因此标定生效与标定持久是两回事，持久化要经过 NvM 队列提交。"
+        },
+        {
+          "id": "xcp-memory#3",
+          "heading": "A2L 的作用",
+          "level": 2,
+          "anchor": "a2l-的作用",
+          "keywords": [
+            "A2L",
+            "ASAM",
+            "换算公式",
+            "地址",
+            "标定工具"
+          ],
+          "text": "A2L（ASAM MCD-2 MC）是描述 ECU 测量与标定对象的文本文件：它给出变量名、地址、数据类型、换算公式与轴信息，让标定工具知道如何解析 ECU 内存。A2L 与 ECU 中的实际地址必须一致，版本不匹配会导致读到错误数据。它是 XCP 工具链的关键元数据，而不是 ECU 运行时的一部分。"
+        },
+        {
+          "id": "xcp-memory#4",
+          "heading": "地址与数据布局",
+          "level": 2,
+          "anchor": "地址与数据布局",
+          "keywords": [
+            "XCP",
+            "地址",
+            "A2L",
+            "MAP",
+            "数据布局"
+          ],
+          "text": "XCP 访问的是绝对地址，因此 A2L 中记录的地址必须与当前软件镜像匹配；一旦软件重新编译导致布局变化，旧 A2L 就可能指向错误位置。工程上用 MAP 文件或工具自动生成 A2L 来保持同步。理解地址与布局的关系，能解释为什么换个软件版本后标定就读不对了。"
+        },
+        {
+          "id": "xcp-memory#5",
+          "heading": "标定的访问安全",
+          "level": 2,
+          "anchor": "标定的访问安全",
+          "keywords": [
+            "标定",
+            "安全",
+            "访问控制",
+            "XCP",
+            "参数"
+          ],
+          "text": "在线标定能修改影响控制行为的参数，因此需要访问控制与安全措施，避免非授权写入或误写危险值。XCP 的访问权限与安全机制由项目配置，具体实现因供应商而异。把能连上 XCP 当成可以随意改，忽视了标定写入对整车行为的实际影响。"
+        }
+      ]
+    },
+    {
+      "id": "xcp-calibration",
+      "title": "标定流程与持久化",
+      "category": "xcp",
+      "tags": [
+        "XCP",
+        "标定",
+        "NvM",
+        "数据集"
+      ],
+      "summary": "说明标定流程各阶段、标定与 NvM 联动、多套数据集切换以及标定的工程边界。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/06-xcp.md"
+      },
+      "refs": [
+        "src-xcp"
+      ],
+      "chunks": [
+        {
+          "id": "xcp-calibration#1",
+          "heading": "一次标定流程",
+          "level": 2,
+          "anchor": "一次标定流程",
+          "keywords": [
+            "标定",
+            "XCP",
+            "RAM",
+            "NvM",
+            "复位"
+          ],
+          "text": "一次典型标定流程是：连接 XCP、读取当前标定值、在 RAM 中修改并观察控制响应、确认效果后把参数保存到 NvM、等待提交完成、再复位验证新值能恢复。每一步都对应不同状态：RAM 生效、NvM 排队、提交完成、掉电保持。把其中任一步当终点，都会导致看起来改了但没保住。"
+        },
+        {
+          "id": "xcp-calibration#2",
+          "heading": "标定与 NvM 的联动",
+          "level": 2,
+          "anchor": "标定与-nvm-的联动",
+          "keywords": [
+            "XCP",
+            "标定",
+            "NvM",
+            "队列",
+            "提交"
+          ],
+          "text": "XCP 标定的持久化常复用 NvM：工具把标定值写入标定块，NvM 按队列异步提交到介质。提交前断电会丢失未保存修改。教学实验把标定与 DTC 放进同一套共享 NvM 队列，正是为了展示请求受理、Flash 写入、校验与提交之间的边界，以及它们共用的异步机制。"
+        },
+        {
+          "id": "xcp-calibration#3",
+          "heading": "多套标定的切换",
+          "level": 2,
+          "anchor": "多套标定的切换",
+          "keywords": [
+            "标定",
+            "数据集",
+            "标定页",
+            "保存",
+            "复位"
+          ],
+          "text": "ECU 可保存多套标定数据，即多个数据集，运行时通过切换标定页选择其一。切换只改变哪个数据集生效，不改变代码；保存则把当前选定数据写回持久存储。理解切换与保存的区别，能解释为什么在多套标定间来回切后，某次复位恢复的可能并不是最后编辑的那一套。"
+        },
+        {
+          "id": "xcp-calibration#4",
+          "heading": "标定的工程边界",
+          "level": 2,
+          "anchor": "标定的工程边界",
+          "keywords": [
+            "标定",
+            "验证",
+            "可追溯性",
+            "XCP",
+            "A2L"
+          ],
+          "text": "在线标定能加速开发，但不能替代完整验证：修改后的参数仍需在台架与实车上按安全流程验证，且要记录标定版本与可追溯性。教学 XCP 实验只模拟连接、DAQ、RAM 修改与持久化关系，不解析 ASAM XCP 报文或 A2L 文件，也不能据此认为已具备量产标定能力。"
+        }
+      ]
+    },
+    {
+      "id": "system-layering",
+      "title": "CP 分层架构与 RTE",
+      "category": "system",
+      "tags": [
+        "SWC",
+        "RTE",
+        "BSW",
+        "MCAL"
+      ],
+      "summary": "从应用层到 MCAL 梳理分层职责，说明 RTE 作为契约层、SWC 端口与可移植性的代价。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/07-system.md"
+      },
+      "refs": [
+        "src-vfb"
+      ],
+      "chunks": [
+        {
+          "id": "system-layering#1",
+          "heading": "AUTOSAR CP 的分层",
+          "level": 2,
+          "anchor": "autosar-cp-的分层",
+          "keywords": [
+            "AUTOSAR",
+            "SWC",
+            "RTE",
+            "BSW",
+            "MCAL"
+          ],
+          "text": "AUTOSAR Classic Platform 自上而下大致分为应用层 SWC、RTE、BSW 与 MCAL。应用层通过 RTE 与外界交互，不直接触碰底层；RTE 是应用与 BSW 之间的契约层；BSW 提供服务，包括通信、诊断、存储、模式管理与 OS；MCAL 直接驱动 MCU 外设。分层让软件可移植、可复用，也让职责边界清晰。"
+        },
+        {
+          "id": "system-layering#2",
+          "heading": "RTE 作为契约层",
+          "level": 2,
+          "anchor": "rte-作为契约层",
+          "keywords": [
+            "RTE",
+            "SWC",
+            "BSW",
+            "sender/receiver",
+            "生成"
+          ],
+          "text": "RTE 由工具根据 SWC 描述与配置自动生成，是连接应用与 BSW 的契约：它把 sender/receiver 数据、client/server 服务、模式切换与触发映射成具体函数与事件。应用只依赖 RTE 接口，不直接调用 BSW，因此换下层实现时应用可基本不变。把 RTE 当成可手写的普通模块，会忽视它由生成代码承载这一事实。"
+        },
+        {
+          "id": "system-layering#3",
+          "heading": "BSW 的组成",
+          "level": 2,
+          "anchor": "bsw-的组成",
+          "keywords": [
+            "BSW",
+            "OS",
+            "NvM",
+            "Dcm",
+            "Dem"
+          ],
+          "text": "BSW 包含系统服务，如 OS、EcuM、BswM、WdgM；存储服务，如 NvM、MemIf、Fee、Fls；通信服务，如 ComM、NM、Com、PduR、CanTp、CanIf；诊断服务，如 Dcm、Dem；以及 I/O 抽象。它们分层协作，通过配置生成代码。理解 BSW 各子栈的职责，才能判断某个功能该由谁负责，而不是把所有逻辑塞进一个模块。"
+        },
+        {
+          "id": "system-layering#4",
+          "heading": "MCAL 的职责",
+          "level": 2,
+          "anchor": "mcal-的职责",
+          "keywords": [
+            "MCAL",
+            "Mcu",
+            "Port",
+            "Fls",
+            "Can"
+          ],
+          "text": "MCAL（Microcontroller Abstraction Layer）把 MCU 外设封装成标准接口：Mcu 管时钟与复位、Port 管引脚复用、Dio 管数字 I/O、Spi/Adc/Pwm 管外设、Fls 管 Flash、Can 管 CAN 控制器。MCAL 之上是 ECU 抽象与 BSW。MCAL 直接面对寄存器，是移植到新硬件时最需要替换的一层。"
+        },
+        {
+          "id": "system-layering#5",
+          "heading": "SWC 与接口描述",
+          "level": 2,
+          "anchor": "swc-与接口描述",
+          "keywords": [
+            "SWC",
+            "Port",
+            "sender/receiver",
+            "client/server",
+            "RTE"
+          ],
+          "text": "SWC（Software Component）是应用功能的封装单位，通过端口 Port 暴露 sender/receiver 或 client/server 接口，接口内容由软件组件描述定义。SWC 之间不直接调用，而是经 RTE 连接。把 SWC 的可连接性建立在接口描述上，使系统集成可以在不改代码的情况下重连组件，这是 AUTOSAR 复用的基础。"
+        },
+        {
+          "id": "system-layering#6",
+          "heading": "分层与可移植性",
+          "level": 2,
+          "anchor": "分层与可移植性",
+          "keywords": [
+            "分层",
+            "可移植",
+            "RTE",
+            "MCAL",
+            "配置"
+          ],
+          "text": "分层的价值在于可移植与可替换：应用依赖 RTE，BSW 依赖 MCAL 的硬件抽象，因此更换 MCU 时主要替换 MCAL，更换应用时主要重连端口。但这种可移植不是免费的，它依赖配置与接口描述的一致、工具链的生成能力，以及各模块对规范约束的遵守。分层画得再漂亮，配置不对照样跑不通。"
+        }
+      ]
+    },
+    {
+      "id": "system-cdd",
+      "title": "CDD 与特殊硬件",
+      "category": "system",
+      "tags": [
+        "CDD",
+        "ASIC",
+        "关键资源",
+        "Det"
+      ],
+      "summary": "说明 CDD 的定位、与标准驱动的取舍、关键资源保护、模式管理接口与错误上报分层。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/07-system.md"
+      },
+      "refs": [
+        "src-cdd"
+      ],
+      "chunks": [
+        {
+          "id": "system-cdd#1",
+          "heading": "CDD 的定位",
+          "level": 2,
+          "anchor": "cdd-的定位",
+          "keywords": [
+            "CDD",
+            "ASIC",
+            "EcuM",
+            "BswM",
+            "Det"
+          ],
+          "text": "CDD（Complex Device Driver）用于标准 BSW 无法高效或无法表达的场合，例如特殊 ASIC、时序敏感的外设、非标准协议。CDD 可以直接访问硬件，但仍必须受 AUTOSAR 框架约束：它可以被 EcuM/BswM 的模式管理、用 SchM 或 OS 保护关键资源、通过 Det/Dem 上报错误，并通过 RTE 向上提供接口。"
+        },
+        {
+          "id": "system-cdd#2",
+          "heading": "CDD 与标准驱动的取舍",
+          "level": 2,
+          "anchor": "cdd-与标准驱动的取舍",
+          "keywords": [
+            "CDD",
+            "标准驱动",
+            "MCAL",
+            "时序",
+            "验证"
+          ],
+          "text": "标准驱动遵循统一的 MCAL 或 ECU 抽象接口，便于替换与复用；CDD 则为了特定器件或性能要求而定制，接口可能不完全标准化。选择 CDD 通常是因为标准栈无法满足时序或功能需求，但代价是更多的自制代码与验证负担。把本可用标准驱动实现的功能硬做成 CDD，会增加维护成本。"
+        },
+        {
+          "id": "system-cdd#3",
+          "heading": "关键资源保护",
+          "level": 2,
+          "anchor": "关键资源保护",
+          "keywords": [
+            "CDD",
+            "共享资源",
+            "SchM",
+            "OS 资源",
+            "Spinlock"
+          ],
+          "text": "CDD 常同时被任务、ISR 甚至 DMA 访问，共享资源必须保护。可以用 SchM 的临界区、OS 资源或 Spinlock 保证一致性。CDD 设计指南明确要求保护关键资源，避免并发访问破坏数据。把 CDD 能碰硬件误解成 CDD 可以无视并发，是实际调试中最常见的坑之一。"
+        },
+        {
+          "id": "system-cdd#4",
+          "heading": "与模式管理的接口",
+          "level": 2,
+          "anchor": "与模式管理的接口",
+          "keywords": [
+            "CDD",
+            "EcuM",
+            "BswM",
+            "模式管理",
+            "降级"
+          ],
+          "text": "CDD 的初始化、启动与降级可以由 EcuM/BswM 的模式管理驱动：例如初始化在其 InitBlock 中完成，启动在模式切换时放开，故障时进入降级。把 CDD 的状态纳入统一模式管理，能让它和整车生命周期协调，而不是各自为政。缺少这种协调，CDD 可能在错误的时刻被访问或放行。"
+        },
+        {
+          "id": "system-cdd#5",
+          "heading": "错误上报的分层",
+          "level": 2,
+          "anchor": "错误上报的分层",
+          "keywords": [
+            "CDD",
+            "Det",
+            "Dem",
+            "DTC",
+            "错误"
+          ],
+          "text": "CDD 的错误分两类：开发期错误，如参数非法、调用顺序错误，上报 Det；运行期需要诊断化的事件上报 Dem 形成 DTC。把两类混在一起会让诊断与调试都混乱。设计良好的 CDD 会区分程序缺陷与运行故障，并分别走 Det 与 Dem，使问题既能被开发工具发现，也能被诊断仪读出。"
+        }
+      ]
+    },
+    {
+      "id": "system-schm",
+      "title": "SchM 调度与排他区",
+      "category": "system",
+      "tags": [
+        "SchM",
+        "MainFunction",
+        "排他区",
+        "代理"
+      ],
+      "summary": "说明 SchM 的角色、启动序列、排他区保护、跨分区代理以及与 OS 的关系。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/07-system.md"
+      },
+      "refs": [
+        "src-ecum"
+      ],
+      "chunks": [
+        {
+          "id": "system-schm#1",
+          "heading": "SchM 的角色",
+          "level": 2,
+          "anchor": "schm-的角色",
+          "keywords": [
+            "SchM",
+            "BSW",
+            "MainFunction",
+            "调度",
+            "分区"
+          ],
+          "text": "SchM（BSW Scheduler）为 BSW 模块提供调度服务：它把周期处理的 MainFunction 映射到底层任务或调度表中，并协调多分区、多核下的调用。应用通常不直接调用 SchM，而是通过配置把 BSW 的周期函数挂到调度上。理解 SchM，才能解释 BSW 的 MainFunction 什么时候被执行。"
+        },
+        {
+          "id": "system-schm#2",
+          "heading": "SchM 的启动序列",
+          "level": 2,
+          "anchor": "schm-的启动序列",
+          "keywords": [
+            "SchM_Start",
+            "BswM_Init",
+            "SchM_Init",
+            "SchM_StartTiming",
+            "启动"
+          ],
+          "text": "启动时常见顺序是 SchM_Start、BswM_Init、SchM_Init、SchM_StartTiming。SchM_Start 对接调度启动阶段，BswM_Init 初始化模式管理，SchM_Init 完成 SchM 自身初始化，SchM_StartTiming 放开周期时间基准。不要仅凭函数名把 SchM_Init 放到 SchM_Start 前面，具体顺序以所选版本与生成代码为准。"
+        },
+        {
+          "id": "system-schm#3",
+          "heading": "临界区与排他区",
+          "level": 2,
+          "anchor": "临界区与排他区",
+          "keywords": [
+            "SchM",
+            "排他区",
+            "exclusive area",
+            "共享",
+            "实时性"
+          ],
+          "text": "SchM 提供排他区 exclusive area 接口，用于保护跨模块共享的数据或硬件访问，例如 SchM_Enter 与对应 Exit 的成对调用。它相当于在 BSW 层的一把锁，保证同一时刻只有一个执行体进入。把排他区当成万能锁滥用，会拉长阻塞时间、影响实时性，应尽量缩小范围。"
+        },
+        {
+          "id": "system-schm#4",
+          "heading": "跨分区与代理",
+          "level": 2,
+          "anchor": "跨分区与代理",
+          "keywords": [
+            "SchM",
+            "分区",
+            "代理",
+            "IOC",
+            "跨核"
+          ],
+          "text": "当 BSW 分布在多个分区或核上时，SchM 可以承担调用与数据代理：调用方经 SchM 转发到真正拥有者所在分区，数据也可能经 IOC 传递。这种代理让分区隔离与功能调用并存。理解代理概念，才能解释为什么一次 BSW 调用在跨核时不是简单的函数跳转，而涉及同步与数据搬运。"
+        },
+        {
+          "id": "system-schm#5",
+          "heading": "SchM 与 OS 的关系",
+          "level": 2,
+          "anchor": "schm-与-os-的关系",
+          "keywords": [
+            "SchM",
+            "OS",
+            "任务",
+            "调度表",
+            "时序"
+          ],
+          "text": "SchM 建立在 OS 之上：它把 BSW 周期函数映射成 OS 任务或调度表条目，依赖 OS 完成实际调度。SchM 本身不实现抢占或时间片，它只负责把 BSW 的调用挂到合适的调度实体上。因此 OS 配置一变，SchM 映射的时序也会变，二者必须一起设计，而不是孤立调整。"
+        }
+      ]
+    },
+    {
+      "id": "system-wdgm",
+      "title": "WdgM 监督与功能安全",
+      "category": "system",
+      "tags": [
+        "WdgM",
+        "看门狗",
+        "监督",
+        "功能安全"
+      ],
+      "summary": "说明 WdgM 的功能级存活监督、三种监督模式、看门狗分层与和功能安全的关系。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/07-system.md"
+      },
+      "refs": [
+        "src-wdg"
+      ],
+      "chunks": [
+        {
+          "id": "system-wdgm#1",
+          "heading": "WdgM 的职责",
+          "level": 2,
+          "anchor": "wdgm-的职责",
+          "keywords": [
+            "WdgM",
+            "Supervised Entity",
+            "alive",
+            "喂狗",
+            "复位"
+          ],
+          "text": "WdgM（Watchdog Manager）负责功能级存活监督：它把受监督实体 Supervised Entity 的 alive 检查点聚合起来，判断相关功能是否按预期节奏执行，再据此喂狗或触发复位。它监督的是程序是否在正确节奏推进，而不是单个任务的执行时间。把 WdgM 和 OS 时间保护混为一谈，会误判监督层次。"
+        },
+        {
+          "id": "system-wdgm#2",
+          "heading": "监督模式",
+          "level": 2,
+          "anchor": "监督模式",
+          "keywords": [
+            "WdgM",
+            "Alive Supervision",
+            "Deadline Supervision",
+            "Logical Supervision",
+            "检查点"
+          ],
+          "text": "WdgM 支持不同的监督模式：Alive Supervision 检查实体是否按顺序报告检查点；Deadline Supervision 检查检查点之间的时间窗；Logical Supervision 检查程序控制流的合法顺序。三者从不同角度捕捉异常。配置时应按功能风险选择合适的组合，而不是一律开启全部监督导致误报。"
+        },
+        {
+          "id": "system-wdgm#3",
+          "heading": "看门狗的分层",
+          "level": 2,
+          "anchor": "看门狗的分层",
+          "keywords": [
+            "看门狗",
+            "WdgM",
+            "Wdg",
+            "Wdg_SetTriggerCondition",
+            "复位"
+          ],
+          "text": "看门狗通常分内部看门狗与外部看门狗，由 WdgM 决定喂狗节奏，再由 Wdg 驱动通过 Wdg_SetTriggerCondition 之类接口真正触发硬件。喂狗过早过频会降低监督价值，过晚则可能误复位。因此喂狗时机应与监督结果绑定，而不是固定周期无条件喂。"
+        },
+        {
+          "id": "system-wdgm#4",
+          "heading": "与功能安全的关系",
+          "level": 2,
+          "anchor": "与功能安全的关系",
+          "keywords": [
+            "WdgM",
+            "功能安全",
+            "ISO 26262",
+            "安全机制",
+            "安全目标"
+          ],
+          "text": "WdgM 是功能安全常用的安全机制之一，但单独存在不等于满足 ISO 26262：还需要危害分析、安全目标、其它安全机制组合、验证与确认，以及独立性与安全案例。把有看门狗当成已经功能安全是典型误解。AUTOSAR 提供机制与框架，安全目标的达成仍是系统工程问题。"
+        }
+      ]
+    },
+    {
+      "id": "methodology-arxml",
+      "title": "ARXML 与 ECU 提取",
+      "category": "methodology",
+      "tags": [
+        "ARXML",
+        "ECU Extract",
+        "配置",
+        "变体"
+      ],
+      "summary": "说明 ARXML 的定位、ECU 提取、模型到代码、配置变体与工具互操作问题。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/08-methodology.md"
+      },
+      "refs": [
+        "src-arxml"
+      ],
+      "chunks": [
+        {
+          "id": "methodology-arxml#1",
+          "heading": "ARXML 是什么",
+          "level": 2,
+          "anchor": "arxml-是什么",
+          "keywords": [
+            "ARXML",
+            "XML",
+            "软件组件",
+            "ECU",
+            "配置"
+          ],
+          "text": "ARXML 是 AUTOSAR 基于 XML 的描述格式，用标准化的方式描述软件组件、接口、系统拓扑、ECU 资源、BSW 配置等信息。它让不同工具之间可以交换模型，而不是各写各的私有格式。ARXML 描述的是模型与配置，不是可执行代码，也不是硬件镜像本身。"
+        },
+        {
+          "id": "methodology-arxml#2",
+          "heading": "ECU 提取",
+          "level": 2,
+          "anchor": "ecu-提取",
+          "keywords": [
+            "ECU Extract",
+            "系统描述",
+            "信号",
+            "通信矩阵",
+            "配置"
+          ],
+          "text": "ECU Extract（ECU 提取）是从系统级描述中抽取某个 ECU 所需的部分，得到该 ECU 的配置输入。整车系统描述包含多个 ECU 与网络，但每个 ECU 只需要与自己相关的接口、信号、通信矩阵与资源。ECU 提取把系统模型裁剪成 ECU 级模型，是连接系统设计与 ECU 集成的重要一步。"
+        },
+        {
+          "id": "methodology-arxml#3",
+          "heading": "模型到代码",
+          "level": 2,
+          "anchor": "模型到代码",
+          "keywords": [
+            "ARXML",
+            "RTE",
+            "BSW",
+            "代码框架",
+            "集成"
+          ],
+          "text": "描述文件经工具链生成 RTE、BSW 配置与代码框架，再与手写代码、MCAL、操作系统一起集成、编译、链接成 ECU 软件。这个过程依赖工具的生成能力与配置一致性。把 ARXML 当成能直接编译成固件是不准确的：它是模型与配置，真正落地还依赖生成、集成与构建。"
+        },
+        {
+          "id": "methodology-arxml#4",
+          "heading": "变体与配置时机",
+          "level": 2,
+          "anchor": "变体与配置时机",
+          "keywords": [
+            "Pre-Compile",
+            "Post-Build",
+            "变体",
+            "配置",
+            "一致性"
+          ],
+          "text": "AUTOSAR 支持 Pre-Compile、Post-Build、Post-Build Loadable 等配置时机，决定配置在何时确定，是编译前、编译后链接前，还是运行可加载。不同变体影响启动时如何选择配置、如何做一致性校验，也影响生产与售后更新方式。教程里的 Post-Build 校验正是这一机制在启动阶段的体现。"
+        },
+        {
+          "id": "methodology-arxml#5",
+          "heading": "工具与互操作",
+          "level": 2,
+          "anchor": "工具与互操作",
+          "keywords": [
+            "ARXML",
+            "互操作",
+            "AUTOSAR",
+            "版本",
+            "工具"
+          ],
+          "text": "ARXML 的价值在于互操作，但不同工具对格式的覆盖与扩展不同，实际交换时常需要适配。工程上要约定使用的 AUTOSAR 版本、扩展规则与命名规范，否则模型在工具间来回转换容易丢失信息。理解这点能避免模型导出再导入就变了这类问题被当成工具缺陷。"
+        }
+      ]
+    },
+    {
+      "id": "methodology-toolchain",
+      "title": "BSW 配置工具链与集成",
+      "category": "methodology",
+      "tags": [
+        "BSW",
+        "配置工具",
+        "生成代码",
+        "集成"
+      ],
+      "summary": "说明配置工具链、配置一致性、生成与手写代码边界、版本迁移以及构建集成。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/08-methodology.md"
+      },
+      "refs": [
+        "src-ecum"
+      ],
+      "chunks": [
+        {
+          "id": "methodology-toolchain#1",
+          "heading": "BSW 配置工具链",
+          "level": 2,
+          "anchor": "bsw-配置工具链",
+          "keywords": [
+            "BSW",
+            "配置工具",
+            "MCAL",
+            "OS",
+            "生成配置代码"
+          ],
+          "text": "量产项目通常用供应商提供的配置工具设置 BSW 参数、生成配置代码，再与 MCAL、OS、RTE 生成结果集成。工具链把抽象配置变成可编译代码，并保证模块间参数一致。教学项目不依赖这些工具，因此只能演示概念，不能替代真实配置工具链。"
+        },
+        {
+          "id": "methodology-toolchain#2",
+          "heading": "配置一致性",
+          "level": 2,
+          "anchor": "配置一致性",
+          "keywords": [
+            "配置一致性",
+            "NvM",
+            "PduR",
+            "CanIf",
+            "SchM"
+          ],
+          "text": "配置一致性是集成成败的关键：模块 A 假设的参数必须与模块 B 的实际配置吻合，例如 NvM 块长度要与实际数据结构一致、PduR 路由要与 CanIf 通道对应、OS 任务要与 SchM 映射匹配。工具能检查部分一致性，但大量语义一致性仍靠工程师核对。把工具没报错当成配置正确是危险的。"
+        },
+        {
+          "id": "methodology-toolchain#3",
+          "heading": "生成与手写代码的边界",
+          "level": 2,
+          "anchor": "生成与手写代码的边界",
+          "keywords": [
+            "生成代码",
+            "手写代码",
+            "CDD",
+            "配置",
+            "集成"
+          ],
+          "text": "AUTOSAR 工程里既有工具生成的代码，也有手写的应用与 CDD。生成代码通常在重新生成时被覆盖，因此手写逻辑不能直接改在生成文件里，而应通过配置扩展点或独立文件实现。违反这条边界，会让下一次生成吞掉手工修改，是集成阶段常见的返工来源。"
+        },
+        {
+          "id": "methodology-toolchain#4",
+          "heading": "版本与迁移",
+          "level": 2,
+          "anchor": "版本与迁移",
+          "keywords": [
+            "AUTOSAR",
+            "版本",
+            "BSW",
+            "迁移",
+            "基线"
+          ],
+          "text": "AUTOSAR 版本、BSW 供应商版本、工具版本三者需要协同。升级其中一环可能改变配置项、API 或生成结果，需要重新验证。规范也会演进，例如 Fixed 被移除、接口参数调整，因此工程上要固定基线版本并记录迁移影响。把最新版当成一定兼容往往会在集成时付出代价。"
+        },
+        {
+          "id": "methodology-toolchain#5",
+          "heading": "构建与集成",
+          "level": 2,
+          "anchor": "构建与集成",
+          "keywords": [
+            "集成",
+            "MCAL",
+            "RTE",
+            "OS",
+            "构建"
+          ],
+          "text": "集成阶段要把 MCAL、BSW、RTE、OS、应用与链接脚本正确地拼在一起，处理启动代码、内存布局、编译选项与依赖顺序。构建系统需要能复现同样的输入得到同样的输出。教学项目用纯前端模拟绕过了这些，但真实工程里构建与集成本身就是一项专业性很强的工作。"
+        }
+      ]
+    },
+    {
+      "id": "methodology-aspice",
+      "title": "AUTOSAR 与 ASPICE",
+      "category": "methodology",
+      "tags": [
+        "ASPICE",
+        "追溯",
+        "过程",
+        "ISO 26262"
+      ],
+      "summary": "说明 ASPICE 是过程模型、双向追溯、过程与工具的关系，以及与功能安全和教学的边界。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/08-methodology.md"
+      },
+      "refs": [
+        "src-arxml"
+      ],
+      "chunks": [
+        {
+          "id": "methodology-aspice#1",
+          "heading": "ASPICE 是什么",
+          "level": 2,
+          "anchor": "aspice-是什么",
+          "keywords": [
+            "ASPICE",
+            "过程能力",
+            "需求",
+            "追溯",
+            "AUTOSAR"
+          ],
+          "text": "ASPICE（Automotive SPICE）是评估汽车软件过程能力的模型，关注需求、设计、实现、测试、追溯与项目管理等过程的成熟度。它评的是过程能力，不是产品功能或代码质量本身。AUTOSAR 是技术标准，ASPICE 是过程标准，二者互补但不同层：一个管怎么做软件，一个管怎么组织做软件的过程。"
+        },
+        {
+          "id": "methodology-aspice#2",
+          "heading": "双向追溯",
+          "level": 2,
+          "anchor": "双向追溯",
+          "keywords": [
+            "ASPICE",
+            "追溯",
+            "需求",
+            "设计",
+            "ARXML"
+          ],
+          "text": "ASPICE 强调双向追溯：从需求到设计、到实现、到测试用例都要能相互追踪。AUTOSAR 的模型与描述文件为追溯提供了抓手，如接口、组件、配置项，但追溯不会自动成立，需要工程上维护链接与评审。仅有一堆 ARXML 文件而没有追溯关系，并不满足过程要求。"
+        },
+        {
+          "id": "methodology-aspice#3",
+          "heading": "过程与工具",
+          "level": 2,
+          "anchor": "过程与工具",
+          "keywords": [
+            "ASPICE",
+            "过程",
+            "工具",
+            "审计",
+            "评估"
+          ],
+          "text": "ASPICE 关注过程，因此工具只是手段：配置工具、需求管理、测试管理、版本控制要服务于可重复、可审计的流程。把上了某工具当成达到某等级是误解。评估看的是过程证据与一致性，而不是工具清单。对教学项目而言，理解过程与工具的关系，比记住等级编号更有用。"
+        },
+        {
+          "id": "methodology-aspice#4",
+          "heading": "安全与过程",
+          "level": 2,
+          "anchor": "安全与过程",
+          "keywords": [
+            "ASPICE",
+            "ISO 26262",
+            "功能安全",
+            "过程",
+            "安全目标"
+          ],
+          "text": "功能安全（ISO 26262）与 ASPICE 关注点不同：前者关心产品是否达到安全目标，后者关心开发过程能力。二者在实践中相互支撑，例如安全需求需要被追溯、验证活动需要被记录。把两者混为同一件事，会导致既做不好过程管理，也做不好安全论证。"
+        },
+        {
+          "id": "methodology-aspice#5",
+          "heading": "教学与工程的距离",
+          "level": 2,
+          "anchor": "教学与工程的距离",
+          "keywords": [
+            "教学",
+            "ASPICE",
+            "过程",
+            "追溯",
+            "工程"
+          ],
+          "text": "教学实验室能帮助理解依赖关系与调试思路，但不覆盖 ASPICE 的过程证据、评审记录与工具链审计。想落到真实工程，需要建立需求管理、配置管理、测试管理与追溯体系，并按选定标准执行。把教学演示当成过程合规的证明，是对两者的双重误解。"
+        }
+      ]
+    },
+    {
+      "id": "methodology-testing",
+      "title": "测试策略与边界诚实",
+      "category": "methodology",
+      "tags": [
+        "测试",
+        "HIL",
+        "SIL",
+        "回归"
+      ],
+      "summary": "说明分层测试、SIL/HIL、回归确定性与「测试边界的诚实」这一工程态度。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/08-methodology.md"
+      },
+      "refs": [
+        "src-tests"
+      ],
+      "chunks": [
+        {
+          "id": "methodology-testing#1",
+          "heading": "分层测试",
+          "level": 2,
+          "anchor": "分层测试",
+          "keywords": [
+            "单元测试",
+            "集成测试",
+            "系统测试",
+            "AUTOSAR",
+            "验证"
+          ],
+          "text": "汽车软件测试通常分单元测试、集成测试、系统测试与整车或实车测试，各自验证不同层次。AUTOSAR 的分层让单元与集成可在模型或代码层进行，而系统级还要验证通信、诊断、存储与模式管理的联动。只做一层测试就宣称系统可用，是常见的过度自信。"
+        },
+        {
+          "id": "methodology-testing#2",
+          "heading": "HIL 与 SIL",
+          "level": 2,
+          "anchor": "hil-与-sil",
+          "keywords": [
+            "SIL",
+            "HIL",
+            "时序",
+            "回归",
+            "ECU"
+          ],
+          "text": "SIL（软件在环）在主机上运行软件模型或代码，HIL（硬件在环）把真实 ECU 接入仿真环境测试外围交互。HIL 能验证真实时序与硬件接口，SIL 更易自动化与回归。二者互补，不能互相替代。教学仿真更接近行为级 SIL 的简化版，但明确不执行真实固件与硬件。"
+        },
+        {
+          "id": "methodology-testing#3",
+          "heading": "回归与确定性",
+          "level": 2,
+          "anchor": "回归与确定性",
+          "keywords": [
+            "回归",
+            "确定性",
+            "虚拟时钟",
+            "测试",
+            "回放"
+          ],
+          "text": "回归测试要求确定性：相同输入应得到相同输出，否则无法判断改动是否引入问题。因此测试环境要控制时间、随机性与外部依赖。教学项目用共享虚拟时钟推进倒计时，暂停不会偷偷消耗时间，正是为了让同一操作序列可确定性回放。真实测试中同样要消除不确定来源。"
+        },
+        {
+          "id": "methodology-testing#4",
+          "heading": "测试边界的诚实",
+          "level": 2,
+          "anchor": "测试边界的诚实",
+          "keywords": [
+            "测试",
+            "覆盖",
+            "功能安全",
+            "仿真",
+            "边界"
+          ],
+          "text": "测试要如实说明覆盖与未覆盖：教学仿真不执行真实固件、不连物理 CAN、不做功能安全认证，因此它的测试只能证明教学模型内部一致，不能证明量产可用。把仿真通过当成产品验证通过，会掩盖真实风险。诚实地标注测试边界，是工程可信度的一部分。"
+        }
+      ]
+    },
+    {
+      "id": "boundary-teaching-tags",
+      "title": "教学标签不等于规范",
+      "category": "boundary",
+      "tags": [
+        "教学标签",
+        "42 步",
+        "仿真",
+        "边界"
+      ],
+      "summary": "说明 STARTUP/RUN 标签、42 步、模块就绪与动画成功都只是教学抽象，而非规范或硬件证据。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/09-boundary.md"
+      },
+      "refs": [
+        "src-model"
+      ],
+      "chunks": [
+        {
+          "id": "boundary-teaching-tags#1",
+          "heading": "教学标签不是规范状态",
+          "level": 2,
+          "anchor": "教学标签不是规范状态",
+          "keywords": [
+            "教学标签",
+            "STARTUP",
+            "RUN",
+            "Flexible",
+            "规范"
+          ],
+          "text": "教学界面里的 STARTUP I、STARTUP II、RUN 是方便学习的阶段标签，不是 AUTOSAR 规范规定的固定状态集合。把教学标签当成规范术语，会误以为现代 Flexible EcuM 必须实现这些状态。理解标签只是教学抽象，才能正确阅读真实规范中的状态与接口。"
+        },
+        {
+          "id": "boundary-teaching-tags#2",
+          "heading": "42 步不是规范要求",
+          "level": 2,
+          "anchor": "42-步不是规范要求",
+          "keywords": [
+            "42 步",
+            "教学粒度",
+            "启动",
+            "多核",
+            "依赖"
+          ],
+          "text": "7 阶段、42 步是本实验室的教学粒度，不是 AUTOSAR 规定的固定数量。真实工程的启动可能涉及多核、多分区、分阶段初始化与更多配置依赖，步数完全不同。把 42 步记住当成学完了启动，会忽略真正重要的依赖关系与前提条件。"
+        },
+        {
+          "id": "boundary-teaching-tags#3",
+          "heading": "模块就绪不等于调用过 Init",
+          "level": 2,
+          "anchor": "模块就绪不等于调用过-init",
+          "keywords": [
+            "模块就绪",
+            "Init",
+            "DIO",
+            "Port",
+            "MemIf"
+          ],
+          "text": "界面上某模块显示就绪，可能只表示它的下层依赖已准备好，并不意味着一定调用过它的初始化函数。例如 DIO 的硬件准备由 Port 驱动完成，MemIf 没有标准初始化 API。凭模块名机械地拼一个初始化调用，是常见的错误推断。判断是否初始化过，要看实际调用与配置，而不是看界面颜色。"
+        },
+        {
+          "id": "boundary-teaching-tags#4",
+          "heading": "动画成功不是硬件可启动",
+          "level": 2,
+          "anchor": "动画成功不是硬件可启动",
+          "keywords": [
+            "动画",
+            "仿真",
+            "硬件",
+            "集成",
+            "验证"
+          ],
+          "text": "教学动画成功只证明教学模型内部一致，真实 ECU 可启动还需要生成配置、集成模块、目标硬件与实测验证。把动画当成真实 ECU 能跑的证据，是对仿真能力的过度解读。仿真适合在此之前理解依赖与调试思路，而不是替代集成与验证。"
+        },
+        {
+          "id": "boundary-teaching-tags#5",
+          "heading": "明确声明非量产",
+          "level": 2,
+          "anchor": "明确声明非量产",
+          "keywords": [
+            "教学级行为仿真",
+            "ARXML",
+            "CAN",
+            "功能安全",
+            "示例"
+          ],
+          "text": "本实验室明确声明自己是教学级行为仿真：不执行真实 ECU 固件、不生成 ARXML、不连接物理 CAN、不做功能安全认证，DID、DTC、Seed/Key 与时间参数都是示例。保持这种诚实边界，才能让学习者把注意力放在依赖关系与调试方法上，而不被看起来像真的所误导。"
+        }
+      ]
+    },
+    {
+      "id": "boundary-request-done",
+      "title": "请求受理不等于完成",
+      "category": "boundary",
+      "tags": [
+        "异步",
+        "NvM",
+        "ComM",
+        "发送确认"
+      ],
+      "summary": "集中澄清「请求受理」「数据可用」「实际模式」「端到端送达」这些常被混同的边界。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/09-boundary.md"
+      },
+      "refs": [
+        "src-ecum"
+      ],
+      "chunks": [
+        {
+          "id": "boundary-request-done#1",
+          "heading": "请求受理不等于完成",
+          "level": 2,
+          "anchor": "请求受理不等于完成",
+          "keywords": [
+            "异步",
+            "NvM_ReadAll",
+            "CanSM_RequestComMode",
+            "NvM_WriteBlock",
+            "受理"
+          ],
+          "text": "很多 AUTOSAR 接口是异步的：调用返回只表示请求被受理，真正的完成要靠后续周期处理与通知。NvM_ReadAll 返回 void、CanSM_RequestComMode 返回 E_OK 仅表示接受请求、NvM_WriteBlock 只是入队，都是典型例子。把函数返回当成事情做完，是启动与存储调试中最常见的错误。"
+        },
+        {
+          "id": "boundary-request-done#2",
+          "heading": "NvM 请求不等于已写入",
+          "level": 2,
+          "anchor": "nvm-请求不等于已写入",
+          "keywords": [
+            "NvM",
+            "队列",
+            "提交",
+            "掉电",
+            "持久化"
+          ],
+          "text": "写 NvM 时，请求只是进入队列，还要经过 MemIf、Fee、Fls、校验与提交才真正持久化。排队期间断电会丢失未提交的写入。因此 NvM 请求已受理与值已写入并掉电保持之间有明确边界。判断是否写入成功，要看提交完成的证据，而不是看请求返回。"
+        },
+        {
+          "id": "boundary-request-done#3",
+          "heading": "ComM 请求不等于实际模式",
+          "level": 2,
+          "anchor": "comm-请求不等于实际模式",
+          "keywords": [
+            "ComM",
+            "请求模式",
+            "实际模式",
+            "CanSM",
+            "许可"
+          ],
+          "text": "ComM 的请求模式表达需求，实际模式由 CanSM 推进控制器与收发器状态后反馈。请求 FULL 与实际处于 FULL 可以暂时不同。只看模块是否变绿判断通信可用，会漏掉权限未放开、模式未确认、应用 PDU 未启用等前提。区分请求、许可与实际模式，是通信调试的基本功。"
+        },
+        {
+          "id": "boundary-request-done#4",
+          "heading": "已初始化不等于可调度",
+          "level": 2,
+          "anchor": "已初始化不等于可调度",
+          "keywords": [
+            "初始化",
+            "Rte_Start",
+            "Rte_StartTiming",
+            "BswM_Init",
+            "调度"
+          ],
+          "text": "模块完成初始化，不等于它已经被调度执行、也不等于业务已允许上线。Rte_Start 让 RTE 就绪，Rte_StartTiming 才放开周期；BswM_Init 装载规则，后续求值才逐步放行动作。把已初始化当成已运行，会误判系统在某个时刻到底能不能处理业务。"
+        },
+        {
+          "id": "boundary-request-done#5",
+          "heading": "数据可用不等于恢复成功",
+          "level": 2,
+          "anchor": "数据可用不等于恢复成功",
+          "keywords": [
+            "数据可用",
+            "ROM 默认值",
+            "冗余",
+            "恢复",
+            "故障"
+          ],
+          "text": "观察到某块数据可用时，要能区分它是从介质恢复的原值、从冗余副本恢复、还是回退到 ROM 默认值。后两者虽然让数据可用，却意味着原数据可能已损坏或缺失。把数据可用笼统当成恢复成功，会在故障排查中掩盖真实问题。"
+        },
+        {
+          "id": "boundary-request-done#6",
+          "heading": "发送确认不等于端到端送达",
+          "level": 2,
+          "anchor": "发送确认不等于端到端送达",
+          "keywords": [
+            "发送确认",
+            "端到端",
+            "E2E",
+            "监督",
+            "送达"
+          ],
+          "text": "底层的发送确认通常表示帧已进入发送过程，不等于远端 ECU 收到或应用已处理。真正的端到端可信要用应用握手、周期监督或 E2E 保护判断。把发送确认当成送达，会掩盖网络丢失、对端未处理等实际问题。"
+        }
+      ]
+    },
+    {
+      "id": "boundary-misconceptions",
+      "title": "常见误解逐条澄清",
+      "category": "boundary",
+      "tags": [
+        "误解",
+        "Flexible",
+        "CAN FD",
+        "ISO-TP"
+      ],
+      "summary": "逐条澄清把 Flexible 当 Fixed、以为 CAN FD 提升 UDS、以为流控是应用层等常见混淆。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/09-boundary.md"
+      },
+      "refs": [
+        "src-model"
+      ],
+      "chunks": [
+        {
+          "id": "boundary-misconceptions#1",
+          "heading": "把 Flexible 当 Fixed",
+          "level": 2,
+          "anchor": "把-flexible-当-fixed",
+          "keywords": [
+            "Flexible",
+            "Fixed",
+            "BswM",
+            "STARTUP",
+            "callout"
+          ],
+          "text": "把现代 Flexible EcuM 当成旧 Fixed 状态机，是常见误解：Flexible 只保留启动骨架，后续由 BswM 按配置推进，并不存在 Fixed 那套写死的 STARTUP 与 RUN 状态以及 InitTwo 与 InitThree callout。混淆两者会导致对启动顺序、NvM 与 RTE 先后关系的错误预期。"
+        },
+        {
+          "id": "boundary-misconceptions#2",
+          "heading": "以为 CAN FD 提升 UDS 语义",
+          "level": 2,
+          "anchor": "以为-can-fd-提升-uds-语义",
+          "keywords": [
+            "CAN FD",
+            "UDS",
+            "ISO-TP",
+            "流控",
+            "帧数"
+          ],
+          "text": "CAN FD 只扩展单帧载荷与数据段码率，不会改变 UDS 服务语义，也不会消除 ISO-TP 的流控、顺序与超时。以为换成 CAN FD 就能省掉流控或让诊断更高级，是对协议分层的误解。它减少的是帧数，不是协议规则。"
+        },
+        {
+          "id": "boundary-misconceptions#3",
+          "heading": "以为 ISO-TP 流控是应用层",
+          "level": 2,
+          "anchor": "以为-iso-tp-流控是应用层",
+          "keywords": [
+            "ISO-TP",
+            "流控",
+            "应用层",
+            "UDS",
+            "负响应"
+          ],
+          "text": "ISO-TP 的流控帧、块大小与 STmin 属于传输层机制，不是应用层语义。把它们当成 UDS 服务的一部分，会混淆协议传输失败与应用层负响应。无响应往往来自传输层，而 7F 开头的负响应才是应用层确实回应。"
+        },
+        {
+          "id": "boundary-misconceptions#4",
+          "heading": "以为 NvM 读失败必须停机",
+          "level": 2,
+          "anchor": "以为-nvm-读失败必须停机",
+          "keywords": [
+            "NvM",
+            "默认值",
+            "降级",
+            "策略",
+            "恢复"
+          ],
+          "text": "NvM 恢复失败后是否停机、是否用默认值、是否有降级运行，属于项目策略而非规范强制。把读失败必须永久停机或必须无条件用默认值当成通用规则，都忽略了数据重要性差异与降级约束。正确做法是明确每块数据的失败策略。"
+        },
+        {
+          "id": "boundary-misconceptions#5",
+          "heading": "以为 ComM 请求即上线",
+          "level": 2,
+          "anchor": "以为-comm-请求即上线",
+          "keywords": [
+            "ComM",
+            "请求",
+            "上线",
+            "CanSM",
+            "远端"
+          ],
+          "text": "发起 ComM 通信请求不等于总线已进入该模式，也不等于远端 ECU 已上线。请求只是本 ECU 的需求表达，实际模式要靠 CanSM 推进与指示反馈，远端可用性要靠网络证据判断。把本地请求当成全局上线，会误判多 ECU 系统的可用性。"
+        },
+        {
+          "id": "boundary-misconceptions#6",
+          "heading": "以为 RUN 就每条网络都 FULL",
+          "level": 2,
+          "anchor": "以为-run-就每条网络都-full",
+          "keywords": [
+            "RUN",
+            "FULL",
+            "ComM",
+            "通道",
+            "网络"
+          ],
+          "text": "ECU 处于 RUN 并不代表它的每条 ComM 通道都是 FULL：不同网络有不同需求与许可状态，应用可运行与具体网络的实际模式要分开看。用一条通道的状态推断整体业务可用性，是整车级诊断中的常见错判。"
+        }
+      ]
+    },
+    {
+      "id": "boundary-safety",
+      "title": "功能安全与 AUTOSAR 的边界",
+      "category": "boundary",
+      "tags": [
+        "ISO 26262",
+        "ASIL",
+        "功能安全",
+        "边界"
+      ],
+      "summary": "澄清 ISO 26262 与 AUTOSAR 的分工、机制不等于认证、ASIL 与架构以及教学模型的诚实边界。",
+      "source": {
+        "kind": "original",
+        "path": "knowledge/09-boundary.md"
+      },
+      "refs": [
+        "src-cdd"
+      ],
+      "chunks": [
+        {
+          "id": "boundary-safety#1",
+          "heading": "功能安全与 AUTOSAR 的分工",
+          "level": 2,
+          "anchor": "功能安全与-autosar-的分工",
+          "keywords": [
+            "ISO 26262",
+            "AUTOSAR",
+            "E2E",
+            "WdgM",
+            "安全目标"
+          ],
+          "text": "ISO 26262 定义功能安全的目标、流程与安全生命周期，AUTOSAR 提供实现这些目标可用的软件架构与机制，如 E2E、WdgM、内存保护、安全模式。AUTOSAR 本身不是一个安全认证，它是工具与框架；安全目标能否达成，取决于系统设计与验证，而不只是用了某个协议栈。"
+        },
+        {
+          "id": "boundary-safety#2",
+          "heading": "机制不等于认证",
+          "level": 2,
+          "anchor": "机制不等于认证",
+          "keywords": [
+            "功能安全",
+            "认证",
+            "E2E",
+            "WdgM",
+            "危害分析"
+          ],
+          "text": "采用了 E2E、WdgM、时间保护等机制，不等于通过功能安全认证。认证需要危害分析、安全目标、机制有效性与覆盖度的论证、验证确认与独立评估。把用了安全机制当成已经安全，是常见的过度自信，也可能掩盖机制配置不当带来的新风险。"
+        },
+        {
+          "id": "boundary-safety#3",
+          "heading": "ASIL 与软件架构",
+          "level": 2,
+          "anchor": "asil-与软件架构",
+          "keywords": [
+            "ASIL",
+            "安全需求",
+            "分区",
+            "OS-Application",
+            "冗余"
+          ],
+          "text": "ASIL（Automotive Safety Integrity Level）决定安全需求的严格度，进而影响架构选择：是否需要内存分区、独立监督、冗余、时序保护等。AUTOSAR 的分区、OS-Application、内存保护与多核隔离为实现这些要求提供了基础，但如何组合仍由安全分析决定，而不是协议栈自动给出。"
+        },
+        {
+          "id": "boundary-safety#4",
+          "heading": "教学模型的诚实边界",
+          "level": 2,
+          "anchor": "教学模型的诚实边界",
+          "keywords": [
+            "教学",
+            "功能安全",
+            "看门狗",
+            "信任链",
+            "边界"
+          ],
+          "text": "本实验室明确不做功能安全认证：没有真实 OS、硬件寄存器、看门狗硬件与安全启动信任链，DID、DTC、Seed/Key 与时间参数都是示例。因此它可以帮助理解机制概念与依赖关系，但不能作为任何安全论证的证据。理解这条边界，是使用教学仿真时最重要的自律。"
+        },
+        {
+          "id": "boundary-safety#5",
+          "heading": "AUTOSAR 不是安全需求的来源",
+          "level": 2,
+          "anchor": "autosar-不是安全需求的来源",
+          "keywords": [
+            "AUTOSAR",
+            "安全需求",
+            "危害分析",
+            "安全目标",
+            "机制"
+          ],
+          "text": "AUTOSAR 提供机制，但安全需求来自车辆功能与危害分析，而不是协议栈。先有安全目标与安全需求，再选择 AUTOSAR 机制去满足它；反过来因为有 AUTOSAR 所以安全是错误因果。区分来源与手段，才能把架构设计与安全论证放在正确的位置。"
+        }
+      ]
+    }
+  ]
+}

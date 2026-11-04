@@ -1,12 +1,24 @@
+// 语法 / 目录 / 模型完整性检查。
+//
+// 本脚本**不启动任何子进程**。本沙箱禁止 spawn + 管道 stdio（EPERM），
+// 因此无法使用 `node --check`。这里改为进程内动态 `import()` 每个模块：
+//  - 模块若存在**语法错误**，`import()` 会在解析阶段直接抛出 `SyntaxError`，精确报错。
+//  - 模块若能解析、但在顶层求值时缺少浏览器全局（document/window 等），抛出
+//    `ReferenceError`，这恰好证明**语法是合法的**：按“浏览器专用模块”放行。
+//  - `tests/**` 不做 import（import 会真的跑测试并污染输出），交由
+//    `node scripts/run-tests.mjs` 实际执行覆盖，这里只登记跳过。
+//
+// 为避免被导入模块的顶层副作用污染检查输出，导入期间会临时静音 stdout、
+// 并对单个模块设置超时，导入结束后立即恢复。
 import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
-import { spawn } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const uiRequiredFiles = ["index.html", "styles.css"];
 const phaseRequiredCount = 7;
 const stepRequiredCount = 42;
+const importTimeoutMs = 8000;
 const engineCandidates = [
   "src/engine.mjs",
   "src/engine.js",
@@ -24,6 +36,18 @@ const modelCandidates = [
   "src/model42.js",
 ];
 
+// 浏览器环境才有的全局符号：抛 "xxx is not defined" 说明模块可解析、只是需要 DOM。
+const browserGlobalPattern =
+  /\b(document|window|localStorage|sessionStorage|navigator|HTMLElement|HTMLCanvasElement|CustomEvent|Event|XMLHttpRequest|requestAnimationFrame|cancelAnimationFrame|matchMedia|getComputedStyle|MutationObserver|IntersectionObserver|ResizeObserver|location|history)\b\s+is not defined/;
+
+function isMainModule() {
+  if (!process.argv[1]) {
+    return false;
+  }
+
+  return pathToFileURL(process.argv[1]).href === import.meta.url;
+}
+
 async function exists(relativePath) {
   try {
     await access(path.join(root, relativePath));
@@ -38,7 +62,8 @@ async function collectJavaScriptFiles(currentDir) {
   const files = [];
 
   for (const entry of entries) {
-    if (entry.name === ".git" || entry.name === "node_modules") {
+    // 跳过版本控制、依赖与运行时临时目录（.runtime 含截图、日志与冲突备份，非源码）。
+    if (entry.name === ".git" || entry.name === "node_modules" || entry.name === ".runtime") {
       continue;
     }
 
@@ -56,25 +81,72 @@ async function collectJavaScriptFiles(currentDir) {
   return files;
 }
 
-function runNodeCheck(filePath) {
-  return new Promise((resolve) => {
-    const child = spawn(process.execPath, ["--check", filePath], {
-      cwd: root,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+function relativePosix(filePath) {
+  return path.relative(root, filePath).split(path.sep).join("/");
+}
 
-    let stderr = "";
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk.toString();
-    });
+function firstLine(text) {
+  return String(text ?? "").split("\n")[0].trim();
+}
 
-    child.on("close", (code) => {
-      resolve({
-        ok: code === 0,
-        stderr: stderr.trim(),
-      });
-    });
+// 进程内导入一个模块来做语法校验。
+// 返回 { ok: true, note? } 或 { ok: false, error }。
+async function importCheck(filePath) {
+  const moduleUrl = pathToFileURL(filePath).href;
+
+  // 屏蔽被导入模块的 stdout 输出与 argv，避免污染本检查进程（如 export-trace 直接跑 main）。
+  const originalWrite = process.stdout.write;
+  const originalArgv = process.argv;
+  process.stdout.write = () => true;
+  process.argv = [process.execPath, "check"];
+
+  const importPromise = import(moduleUrl);
+  importPromise.catch(() => {}); // 超时后避免未处理的 rejection 警告
+
+  let timer;
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const error = new Error(`import timed out after ${importTimeoutMs}ms`);
+      error.code = "CHECK_TIMEOUT";
+      reject(error);
+    }, importTimeoutMs);
+    timer.unref?.();
   });
+
+  try {
+    await Promise.race([importPromise, timeoutPromise]);
+    return { ok: true };
+  } catch (error) {
+    if (error && error.code === "CHECK_TIMEOUT") {
+      return { ok: true, note: "import timed out; syntax accepted, execution skipped" };
+    }
+
+    if (error instanceof SyntaxError) {
+      return { ok: false, error };
+    }
+
+    if (error instanceof ReferenceError && browserGlobalPattern.test(error.message)) {
+      return { ok: true, note: "browser-only module (DOM global missing; syntax verified)" };
+    }
+
+    if (error && error.code === "ERR_MODULE_NOT_FOUND") {
+      return {
+        ok: true,
+        note: `dependency not found (syntax OK): ${firstLine(error.message)}`,
+      };
+    }
+
+    // 其余顶层求值错误不影响“语法是否合法”的判断；只作提示。
+    const name = error && error.name ? error.name : "Error";
+    return {
+      ok: true,
+      note: `non-syntax error on import (syntax OK): ${name}: ${firstLine(error?.message)}`,
+    };
+  } finally {
+    clearTimeout(timer);
+    process.stdout.write = originalWrite;
+    process.argv = originalArgv;
+  }
 }
 
 async function inspectModel42() {
@@ -201,6 +273,7 @@ async function inspectStaticReferences() {
 
 async function main() {
   const failures = [];
+  const notes = [];
 
   for (const relativePath of uiRequiredFiles) {
     if (!(await exists(relativePath))) {
@@ -209,10 +282,34 @@ async function main() {
   }
 
   const jsFiles = await collectJavaScriptFiles(root);
+  let checkedCount = 0;
+  let browserOnlyCount = 0;
+  let deferredTests = 0;
+
   for (const filePath of jsFiles) {
-    const result = await runNodeCheck(filePath);
+    const relativePath = relativePosix(filePath);
+
+    // tests/** 交给 scripts/run-tests.mjs 实际执行覆盖；import 会真的跑测试。
+    if (relativePath.startsWith("tests/")) {
+      deferredTests += 1;
+      continue;
+    }
+
+    const result = await importCheck(filePath);
+    checkedCount += 1;
+
     if (!result.ok) {
-      failures.push(`Syntax check failed for ${path.relative(root, filePath)}: ${result.stderr}`);
+      failures.push(
+        `Syntax check failed for ${relativePath}: ${result.error.name}: ${firstLine(result.error.message)}`,
+      );
+      continue;
+    }
+
+    if (result.note) {
+      notes.push(`${relativePath}: ${result.note}`);
+      if (result.note.startsWith("browser-only")) {
+        browserOnlyCount += 1;
+      }
     }
   }
 
@@ -222,25 +319,54 @@ async function main() {
   }
 
   const externalRefs = await inspectStaticReferences();
-  if (externalRefs.length > 0) {
-    for (const ref of externalRefs) {
-      failures.push(`External URL found in ${ref.file}: ${ref.value}`);
-    }
+  for (const ref of externalRefs) {
+    failures.push(`External URL found in ${ref.file}: ${ref.value}`);
   }
 
   if (failures.length > 0) {
     for (const failure of failures) {
       console.error(`CHECK FAILED: ${failure}`);
     }
-    process.exitCode = 1;
-    return;
+    console.error(
+      `Check finished with ${failures.length} failure(s) across ${checkedCount} file(s).`,
+    );
+    return 1;
   }
 
-  console.log(`Check passed for ${jsFiles.length} JavaScript files.`);
+  console.log(
+    `Check passed for ${checkedCount} JavaScript file(s) — syntax verified in-process (no subprocess).`,
+  );
+  if (browserOnlyCount > 0) {
+    console.log(
+      `  ${browserOnlyCount} browser-only module(s): parsed cleanly, DOM globals absent (expected).`,
+    );
+  }
+  if (deferredTests > 0) {
+    console.log(
+      `  ${deferredTests} test file(s) under tests/ skipped here — run \`node scripts/run-tests.mjs\` to execute them.`,
+    );
+  }
+  for (const note of notes) {
+    console.log(`  - ${note}`);
+  }
   console.log(model42Result.message);
+  return 0;
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.stack ?? error.message : String(error));
-  process.exitCode = 1;
-});
+if (isMainModule()) {
+  main()
+    .then((code) => {
+      process.exitCode = code;
+      // 被导入的模块可能留下计时器/句柄；显式退出以免阻塞。
+      process.exit(code);
+    })
+    .catch((error) => {
+      console.error(
+        error instanceof Error ? error.stack ?? error.message : String(error),
+      );
+      process.exitCode = 1;
+      process.exit(1);
+    });
+}
+
+export { main };

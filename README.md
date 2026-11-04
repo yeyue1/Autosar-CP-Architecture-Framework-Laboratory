@@ -2,7 +2,7 @@
 
 一个零第三方运行时依赖、直接在本机运行的 AUTOSAR Classic Platform 交互式学习实验室。沿着 **7 个阶段、42 个教学步骤**观察控制权从硬件到 EcuM、OS、BswM，最终到 RTE 和应用的交接；再通过整车共享时钟继续学习 UDS、刷写、CDD、多 ECU、CAN NM、NvM/Fee、OS 多核调度和 XCP 在线标定。
 
-页面顶部提供七个同级工作区。四个教学 ECU 及其诊断、存储、网络与标定状态会跨工作区保留：
+页面顶部提供八个同级工作区。四个教学 ECU 及其诊断、存储、网络与标定状态会跨工作区保留：
 
 - **启动流程**：42 步启动动画、故障场景、断点、日志、任务调度与 CAN 报文。
 - **UDS 诊断与刷写**：会话、安全访问、DID、DTC、ISO-TP、教学刷写和虚构 OEM 私有服务。
@@ -11,6 +11,7 @@
 - **存储实验室**：`NvM → MemIf → Fee → Fls → verify → commit` 异步流水线、CRC/写保护、掉电恢复和双扇区 GC。
 - **OS 与多核调度**：固定优先级抢占、Cat1/Cat2 中断、扩展任务事件、IOC、Spinlock、核上下线与截止时间。
 - **XCP 在线标定**：连接、DAQ、RAM 参数、控制响应曲线，以及经同一 NvM 队列实现的掉电保持。
+- **知识库检索**：208 条知识片段的本地检索式 RAG，带引用溯源的抽取式答案，可在应用内阅读原文并定位到被引用的那一小节。
 
 ## 环境要求
 
@@ -60,6 +61,10 @@ node server.mjs --port 4174 --open
 - 用 XCP 教学连接修改 RAM 标定、启动 10 ms DAQ 并观察传感器、滤波值和执行器输出曲线；只有 NvM 提交后的值能跨复位保留。
 - 用两份内置教学镜像练习 `RequestDownload → TransferData → RequestTransferExit → CRC32 → 双分区激活`，可单步或自动执行。
 - 试验三条完全虚构的 OEM 私有服务，观察自定义语义如何继续受会话、安全、顺序和范围检查约束。
+- 在「知识库检索」里用中文或英文术语查证概念，答案的每句话都带编号引用。
+- 点检索结果或引用上的「查看原文」，在右侧面板里读整篇文章，并**自动定位到被引用的那一小节**（带高亮）；面板内有全文目录可跳转，`Esc` 关闭后焦点回到原来的按钮。
+- 用分类筛选把检索限定在某个领域（如只看存储），或在覆盖率偏低时按建议换关键词重投。
+- 从检索结果一键跳转到对应实验工作区，把「读到」和「看到」连起来。
 
 ### 五个场景
 
@@ -89,9 +94,10 @@ node server.mjs --port 4174 --open
 6. 在「存储实验室」写入参数并在不同阶段断电，找出 `commit` 前后的持久化边界。
 7. 在「OS 与多核调度」注入 Cat2 中断和锁竞争，再到「XCP 在线标定」观察参数、DAQ 与 NvM 的联动。
 8. 打开「系统架构」，比较“多个独立 ECU”和“一个 ECU 内多个核心”的所有权差异。
-9. 修改模型中的一项参数，运行自动化测试，再观察其影响。
+9. 用「知识库检索」查证前面任何一个让你卡住的概念，顺着引用读回原始分册。
+10. 修改模型中的一项参数，运行自动化测试，再观察其影响。
 
-详细解释见 **[启动学习指南](docs/learning-guide.md)**、**[UDS 诊断实验指南](docs/uds-lab.md)**、**[CDD、多 ECU 与多核实验指南](docs/system-architecture-lab.md)** 和 **[通信、存储、OS、XCP 运行期实验指南](docs/runtime-labs.md)**；每项重要约束的官方出处与版本差异见 **[来源与复现边界](docs/sources.md)**。
+详细解释见 **[启动学习指南](docs/learning-guide.md)**、**[UDS 诊断实验指南](docs/uds-lab.md)**、**[CDD、多 ECU 与多核实验指南](docs/system-architecture-lab.md)**、**[通信、存储、OS、XCP 运行期实验指南](docs/runtime-labs.md)** 和 **[知识库检索原理](docs/knowledge-rag.md)**；每项重要约束的官方出处与版本差异见 **[来源与复现边界](docs/sources.md)**。
 
 ## 验证与命令行仿真
 
@@ -99,11 +105,25 @@ node server.mjs --port 4174 --open
 # 语法、目录和模型完整性检查
 npm run check
 
-# Node 内建测试：启动、回放、故障、播放控制、本地服务边界
+# 语料库契约校验：chunk id 唯一、文本长度、关键词真实性、分类覆盖、锚点一致性
+npm run check:corpus
+
+# 从 knowledge/*.md 重建 corpus.json（改过文章后必须跑）
+npm run build:corpus
+
+# Node 内建测试：启动、回放、故障、播放控制、本地服务边界、RAG 检索、阅读器与集成接缝
 npm test
 
-# 一次执行上述验证
+# 一次执行上述全部验证
 npm run verify
+
+# 受限环境（如禁止子进程管道 stdio 的沙箱）用单进程运行器：
+# 它在当前进程内跑完 tests/ 下所有用例，绕开 node --test 的子进程模型
+npm run test:direct
+
+# 真实浏览器验证：Chrome headless 截图 + DOM 断言
+# 需要放宽沙箱权限（Chrome 在 Windows 用命名管道做 Mojo IPC）
+npm run verify:browser
 
 # 不打开浏览器，在终端输出完整仿真记录
 npm run trace -- --scenario normal --duration 250
@@ -132,8 +152,24 @@ node scripts/export-trace.mjs --scenario nvm-crc --duration 250 --out .runtime/n
 | [src/extended-ui.mjs](src/extended-ui.mjs) | 通信、存储、调度、标定与整车实例的视图和交互 |
 | [src/app.mjs](src/app.mjs) | 七工作区编排、原有启动/UDS/架构视图和导出 |
 | [index.html](index.html) / [styles.css](styles.css) / [src/extended.css](src/extended.css) | 无框架界面和响应式布局 |
+| [knowledge/corpus.json](knowledge/corpus.json) | 知识库语料：41 篇文档 / 208 个 chunk，九大分类（**由文章派生，勿手改**） |
+| [knowledge/](knowledge/) | 分册文章（真源，`source.path` 溯源目标）与语料编写规范 |
+| [src/rag/tokenize.mjs](src/rag/tokenize.mjs) | 中文 bigram + 英文标识符分词与归一化 |
+| [src/rag/synonyms.mjs](src/rag/synonyms.mjs) | 中英 AUTOSAR 术语同义扩展词表 |
+| [src/rag/index.mjs](src/rag/index.mjs) | BM25 检索、字段加权、高亮偏移量与锚点透传 |
+| [src/rag/answer.mjs](src/rag/answer.mjs) | 抽取式答案合成、引用编号（含 anchor）与覆盖率分级 |
+| [src/rag/loader.mjs](src/rag/loader.mjs) | 语料异步加载与失败降级 |
+| [src/rag/markdown.mjs](src/rag/markdown.mjs) | 零依赖 Markdown 渲染器：行内解析、转义、slugify 锚点 |
+| [src/rag/article.mjs](src/rag/article.mjs) | 文章模型：解析元数据与小节、渲染带 `id` 锚点的 HTML、按锚点查找 |
+| [src/rag-ui.mjs](src/rag-ui.mjs) / [src/rag.css](src/rag.css) | 知识库工作区界面 |
+| [src/rag-reader.mjs](src/rag-reader.mjs) / [src/rag-reader.css](src/rag-reader.css) | 应用内文章阅读器：滑出面板、目录、锚点定位与高亮 |
 | [server.mjs](server.mjs) | 只绑定本机地址、白名单路径的静态 HTTP 服务 |
+| [scripts/build-corpus.mjs](scripts/build-corpus.mjs) | 由 `knowledge/*.md` 生成 `corpus.json` |
+| [scripts/validate-corpus.mjs](scripts/validate-corpus.mjs) | 语料库契约校验 |
+| [scripts/run-tests.mjs](scripts/run-tests.mjs) | 单进程测试运行器（受限环境用） |
+| [scripts/browser-verify.mjs](scripts/browser-verify.mjs) | Chrome headless 真浏览器验证（截图 + DOM 断言） |
 | [tests](tests/) | Node 内置测试，不依赖外部测试框架 |
+| [favicon.svg](favicon.svg) | 站点图标（同源 SVG，避免浏览器请求缺省 favicon 报 404） |
 
 编辑后刷新浏览器加载新版本。模型和视图分离，可以先在命令行验证新场景，再接入界面。没有第三方运行时依赖、云服务、遥测或自动上传。
 
@@ -149,5 +185,8 @@ node scripts/export-trace.mjs --scenario nvm-crc --duration 250 --out .runtime/n
 - 多 ECU 拓扑、核分配、启动屏障和 CDD 特殊 ASIC 均为教学配置，不是可直接生成的系统描述或 OS 配置。
 - STARTUP I / II / RUN 是方便学习的阶段标签，不把现代 Flexible 冒充旧 Fixed 状态机。
 - NvM 恢复后再放行业务是本示例的门控策略，不是所有版本/项目通用的唯一顺序。
+- 知识库是**检索式 RAG**：它计算词频与共现，不理解语义，也不使用神经嵌入或向量检索；答案由语料原文抽句拼成，不会超出语料范围，也可能因为换了说法就检索不到。语料是原创教学文本，不是 AUTOSAR 规范原文，不能作为一致性或合规依据。
+- 应用内阅读器只是渲染器，不提供编辑、批注或版本对比；它定位的依据是「小节标题算出的锚点」，所以改标题会改锚点——这是设计使然。
+- 浏览器验证脚本需要放宽沙箱权限才能启动 Chrome（Windows 上 Mojo IPC 依赖命名管道），这不影响应用本身运行。
 
 想进一步落到真实工程时，应基于明确的 MCU、BSW 供应商、OS 和配置工具另建集成环境，并核对对应版本规范。本实验室适合在此之前理解依赖关系和调试思路。
