@@ -340,6 +340,12 @@ export function renderSection(section, options = {}) {
  * 渲染整篇文章的 HTML：每篇文档的 `#` 标题、导语、以及全部小节。
  * 小节容器带 `id="<anchorPrefix><anchor>"`，与 corpus 里 chunk 的 anchor 一致，
  * 阅读器据此滚动和高亮。
+ *
+ * 文档级 H1 的 id 独占 `doc-` 命名空间并主动避让小节锚点：
+ * 否则一个标题与小节同名的文档（例如标题「请求受理不等于完成」且首节同名）
+ * 会在同一个文件里渲染出两个相同 id，而阅读器用 querySelector 只拿第一个，
+ * 结果点「查看原文」停在文档标题而不是被引用的那一小节。
+ * 目录与 findSection 只认 section.anchor，所以给 H1 让路不影响任何定位。
  * @param {object} article
  * @param {{ anchorPrefix?: string }} [options]
  * @returns {string}
@@ -349,13 +355,31 @@ export function renderArticle(article, options = {}) {
   const documents = article?.documents ?? [];
   if (!documents.length) return '';
 
-  const parts = ['<article class="rag-article">'];
+  // 小节锚点是语料契约的一部分，优先级最高：先把它们全部占位。
+  const reserved = new Set();
+  for (const doc of documents) {
+    for (const section of doc.sections ?? []) reserved.add(`${prefix}${section.anchor}`);
+  }
+
   const docAnchors = createAnchorAllocator();
+  const allocateDocAnchor = doc => {
+    const base = `doc-${slugify(doc.title || doc.id || 'document')}`;
+    let candidate = base;
+    let suffix = 1;
+    // 既避开小节锚点，也避开已分配的文档锚点（后者由 allocator 负责）。
+    while (reserved.has(`${prefix}${candidate}`)) {
+      suffix += 1;
+      candidate = `${base}-${suffix}`;
+    }
+    return docAnchors(candidate);
+  };
+
+  const parts = ['<article class="rag-article">'];
 
   for (const doc of documents) {
-    const docAnchor = docAnchors(slugify(doc.title || doc.id || 'document'));
+    const docAnchor = allocateDocAnchor(doc);
     parts.push(`<section class="rag-doc" data-doc-id="${escapeHtml(doc.id)}">`);
-    parts.push(`<h1 id="${escapeHtml(prefix + docAnchor)}">${escapeHtml(doc.title)}</h1>`);
+    parts.push(`<h1 id="${escapeHtml(prefix + docAnchor)}" data-doc-anchor="${escapeHtml(docAnchor)}">${escapeHtml(doc.title)}</h1>`);
 
     if (doc.intro.trim()) {
       parts.push(`<div class="rag-doc-intro">${renderMarkdown(doc.intro, { anchorPrefix: prefix })}</div>`);

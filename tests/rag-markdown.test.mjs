@@ -612,12 +612,14 @@ test('toPlainText 与现有 corpus 的 chunk.text 逐字一致（A1/A2 同步契
 // renderArticle / renderSection
 // ---------------------------------------------------------------------------
 
-test('renderArticle 渲染标题、导语与小节容器（id 等于 anchor）', () => {
+test('renderArticle 渲染标题、导语与小节容器（小节 id 等于 anchor）', () => {
   const article = parseArticle(ARTICLE_SOURCE);
   const html = renderArticle(article);
   assert.ok(html.startsWith('<article class="rag-article">'));
   assert.ok(html.endsWith('</article>'));
-  assert.ok(html.includes('<h1 id="ecum-flexible-启动顺序">EcuM Flexible 启动顺序</h1>'));
+  // 文档级 H1 独占 doc- 命名空间：它不能和小节锚点抢同一个 id，
+  // 否则标题与小节同名的文档会出现重复 id，阅读器 querySelector 就会命错节点。
+  assert.ok(html.includes('<h1 id="doc-ecum-flexible-启动顺序" data-doc-anchor="doc-ecum-flexible-启动顺序">EcuM Flexible 启动顺序</h1>'));
   assert.ok(html.includes('<div class="rag-doc-intro">'));
   for (const document of article.documents) {
     for (const section of document.sections) {
@@ -631,10 +633,12 @@ test('renderArticle 渲染标题、导语与小节容器（id 等于 anchor）',
   assert.ok(!html.includes('keywords:'));
 });
 
-test('renderArticle 支持 anchorPrefix，且小节 id 前缀与文档标题一致', () => {
+test('renderArticle 支持 anchorPrefix，且小节 id 前缀与文档标题命名空间一致', () => {
   const article = parseArticle(ARTICLE_SOURCE);
   const html = renderArticle(article, { anchorPrefix: 'doc-' });
-  assert.ok(html.includes('<h1 id="doc-ecum-flexible-启动顺序">'));
+  // 文档标题：前缀 + doc- + 标题 slug
+  assert.ok(html.includes('<h1 id="doc-doc-ecum-flexible-启动顺序"'));
+  // 小节：前缀 + 小节 anchor
   assert.ok(html.includes('id="doc-initzero-不使用-post-build-配置"'));
   // data-anchor 保留不带前缀的原始锚点，便于按 chunk.anchor 定位
   assert.ok(html.includes('data-anchor="initzero-不使用-post-build-配置"'));

@@ -189,7 +189,7 @@
 .rag-reader-body {
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: 196px minmax(0, 1fr);
+  grid-template-columns: 216px minmax(0, 1fr);
   /* 必须显式约束行高：隐式 auto 行会让 .rag-reader-content 拿不到确定高度，
      于是 overflow-y:auto 永不生效，长文被裁掉且无法滚动（真浏览器才暴露的坑）。 */
   grid-template-rows: minmax(0, 1fr);
@@ -227,9 +227,15 @@
 .rag-reader-toc-doc {
   display: block;
   padding: 0 6px;
-  font-size: 11px;
+  /*
+   * 目录是固定窄栏（196px）。文档级标题原本用正文级字号，
+   * 流体标尺放大后长标题会折成两行、和下面的小节列表挤在一起。
+   * 这里降到"小标题"档，并允许窄栏内换行但不撑破。
+   */
+  font-size: var(--fs-xs, 11.5px);
   font-weight: 700;
   line-height: 1.45;
+  overflow-wrap: anywhere;
   color: var(--muted, #5b7083);
 }
 
@@ -643,7 +649,7 @@
   .rag-reader-raw {
     display: inline-flex;
     padding: 5px 8px;
-    font-size: 10px;
+    font-size: var(--fs-sm);
     white-space: nowrap;
   }
 

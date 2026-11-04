@@ -168,6 +168,22 @@ node scripts/validate-corpus.mjs
 
 一个容易踩的布局坑记录在这里：面板正文容器是 grid 布局，`grid-template-rows` **必须**显式写成 `minmax(0, 1fr)`。隐式 `auto` 行会让滚动容器拿不到确定高度，`overflow-y: auto` 永不生效——长文会被裁掉且无法滚动。这个问题单元测试查不出来，只有真浏览器会暴露。
 
+### 锚点必须唯一：`doc-` 命名空间
+
+定位用的是 `querySelector('[id="<anchor>"]')`，它**只返回第一个匹配**。所以同一个 `.md` 渲染出的 HTML 里，所有 `id` 必须互不重复——否则点击某条「查看原文」会跳到错误的位置。
+
+`renderArticle` 会把一个分册文件里的**所有文档**一次性渲染出来，于是文档级 `<h1>` 和小节容器共用同一个命名空间。曾经的真实缺陷：`knowledge/09-boundary.md` 里有一篇文档标题就叫「请求受理不等于完成」，而它的首个小节也同名，两者按 `slugify` 算出同一个字符串 `请求受理不等于完成`。结果这份文件里出现两个相同 `id`，点击检索结果会停在文档标题而不是正文小节。
+
+修法是分层让路，而不是去改小节锚点：
+
+- **小节锚点是语料契约的一部分**（`chunk.anchor` 必须等于渲染出的 `id`），优先级最高，先全部占位。
+- **文档级 H1 独占 `doc-` 前缀**，并在分配时主动避开所有已占用的 `section.anchor`；若仍冲突再追加 `-2`、`-3`。
+- 目录和 `findSection` 只认 `section.anchor`，所以给 H1 让路不影响任何定位行为。
+
+三处校验一起兜这个不变量：`renderArticle` 的分配器、`scripts/validate-corpus.mjs` 的「同一文件内 id 唯一」检查、以及 `tests/rag-integration.test.mjs` 的两条断言（全语料 id 唯一 + 标题与小节同名的文档仍能被唯一定位）。
+
+这里的教训值得单独记一笔：原来的集成测试只验证了「锚点能找到 `id`」，没有验证「`id` 唯一」，于是带着缺陷全绿通过。**能查到一个方向，不等于能查到这个方向的全部错误。**
+
 ## 界面
 
 `src/rag-ui.mjs` + `src/rag.css`，构造为 `RagWorkspaceUi`：
@@ -204,6 +220,27 @@ node scripts/browser-verify.mjs   # 真浏览器：截图 + DOM 断言
 其中 `tests/rag-integration.test.mjs` 专门盯**接缝**：引擎给出的每个命中，其 `anchor` 必须等于该 chunk 在 corpus 里的 anchor；corpus 里每个 anchor 必须能在 `renderArticle` 的输出里找到同名 `id`。这条链断了，阅读器就会跳错地方——单元测试各自都是绿的，只有拼起来才露出来。
 
 浏览器验证需要注意：Chrome 在 Windows 上用命名管道做 Mojo IPC，受限沙箱下会直接 FATAL（`mojo platform_channel.cc:112 拒绝访问 (0x5)`），必须放宽权限运行。细节见 [browser-verification.md](browser-verification.md)。
+
+有一个断言本身写错过，值得记下来：移动端的水平溢出检查原本比较 `scrollWidth <= window.innerWidth`。但页面一旦被内容撑宽，**`window.innerWidth` 会跟着一起变大**，等于自己和自己比，于是永远通过。改成和「配置的目标视口宽度」比较后，同一次运行立刻报出 `scrollWidth=394 / 目标视口=390`。顺带查出真凶：`src/vehicle.css` 在 720px 断点把标签栏设成 7 列横向滚动，把第 4 个工作区入口切掉半截、第 8 个孤立到第二行。修成 3 列 × 3 行的换行网格后 `scrollWidth` 回到 390。
+
+## 排版：流体字号标尺
+
+界面原来有 305 处 `font-size` 小于 11px，其中 5px 有 6 处、6px 有 20 处、7px 有 54 处。这些标签、表头和图注在小屏和高 DPI 屏上基本读不清，也无法随屏幕变化。
+
+现在统一收敛到 [`src/typography.css`](../src/typography.css) 的一条 `clamp()` 标尺上：
+
+| 令牌 | 替代原值 | 范围 |
+| --- | --- | --- |
+| `--fs-4xs` | 5px / 6px | 9.5–10.5px |
+| `--fs-3xs` | 7px | 10–11.5px |
+| `--fs-2xs` | 8px | 10.5–12.5px |
+| `--fs-xs` | 9px | 11.5–13.5px |
+| `--fs-sm` | 10px / 10.5px | 12–14.5px |
+| `--fs-base` | 11px | 13–15.5px |
+
+中间按视口宽度线性插值，所以窗口变宽字就变大；窄屏另有更严格的下限（最小 10px），因为小屏本来就难读。全部 CSS 里小于 11px 的裸 px 字号现在是 **0 处**。
+
+两个取舍：两端用 `px` 而不是 `rem`，避免和已有的 `:root{font-size:14px}` 媒体查询互相干扰；标尺**不跟随用户系统字号设置**，它只按视口自适应，不承诺符合 WCAG——这条写进了 README 的边界。
 
 ## 诚实边界
 

@@ -1118,12 +1118,15 @@ async function readDom(session) {
   return session.evaluate("document.documentElement.outerHTML");
 }
 
-async function measureLayout(session) {
+async function measureLayout(session, targetWidth = 0) {
   return session.evaluate(`(() => {
     const doc = document.documentElement;
     return {
       scrollWidth: doc.scrollWidth,
       innerWidth: window.innerWidth,
+      // 目标视口宽度由调用方传入：一旦页面被内容撑宽，window.innerWidth 会跟着变，
+      // 拿 scrollWidth 和 innerWidth 比就变成"自己和自己比"，溢出永远测不出来。
+      targetWidth: ${JSON.stringify(Number(targetWidth) || 0)},
       scrollHeight: doc.scrollHeight,
       innerHeight: window.innerHeight,
       title: document.title,
@@ -1347,13 +1350,14 @@ function runDomAssertions(contextIn) {
   add({
     id: "layout.mobile-no-overflow",
     label: "移动端 390px 无水平溢出",
-    status: mobile && Number.isFinite(mobile.scrollWidth)
-      ? mobile.scrollWidth <= mobile.innerWidth + 1
-        ? "PASS"
-        : "FAIL"
+    status: mobile && Number.isFinite(mobile.scrollWidth) && Number.isFinite(mobile.targetWidth) && mobile.targetWidth > 0
+      ? (mobile.scrollWidth <= mobile.targetWidth + 1 ? "PASS" : "FAIL")
       : "SKIP",
     detail: mobile
-      ? `scrollWidth=${mobile.scrollWidth} / innerWidth=${mobile.innerWidth}`
+      ? `scrollWidth=${mobile.scrollWidth} / 目标视口=${mobile.targetWidth}` +
+        (Number.isFinite(mobile.innerWidth) && mobile.innerWidth > mobile.targetWidth + 1
+          ? `（innerWidth 已被撑到 ${mobile.innerWidth}）`
+          : "")
       : "",
   });
 
@@ -1437,7 +1441,7 @@ async function runCdpVerification({ url, outDir, chromePath, timeoutMs }) {
         fatal = `${viewportName} 视口导航失败: ${errorText(error)}`;
         break;
       }
-      layouts[viewportName] = await measureLayout(context.session);
+      layouts[viewportName] = await measureLayout(context.session, viewport.width);
 
       for (const scenario of SCENARIOS) {
         // 阅读器只截桌面一套；移动端不重复打开，避免留下半开面板。
@@ -1522,7 +1526,9 @@ async function runCdpVerification({ url, outDir, chromePath, timeoutMs }) {
       // 移动端布局在「知识库结果态」下最严苛，取那一刻的值。
       if (viewportName === "mobile") {
         try {
-          layouts.mobileAfterResults = await measureLayout(context.session);
+          // 目标宽度必须传进来：页面一旦被内容撑宽，window.innerWidth 会跟着变大，
+          // 不传就退化成"自己和自己比"，溢出永远测不出来。
+          layouts.mobileAfterResults = await measureLayout(context.session, viewport.width);
         } catch {
           // 忽略：布局断言会退化成 SKIP。
         }
@@ -2067,7 +2073,7 @@ async function runSelfCheck({ outDir }) {
     cspViolations: [],
     consoleErrors: [],
     failedRequests: [],
-    mobileLayout: { scrollWidth: 390, innerWidth: 390 },
+    mobileLayout: { scrollWidth: 390, innerWidth: 390, targetWidth: 390 },
     reader: { status: "ok", trigger: "x", container: "y" },
     searchOutcome: { ok: true },
     strict: true,
@@ -2110,7 +2116,7 @@ async function runSelfCheck({ outDir }) {
       { cspViolations: [{ text: "Refused to execute inline script" }] },
     ],
     ["runtime.no-failed-assets", { failedRequests: [{ url: "/src/app.mjs", status: 500 }] }],
-    ["layout.mobile-no-overflow", { mobileLayout: { scrollWidth: 620, innerWidth: 390 } }],
+    ["layout.mobile-no-overflow", { mobileLayout: { scrollWidth: 620, innerWidth: 390, targetWidth: 390 } }],
     ["knowledge.index-status", { indexStatus: "error" }],
   ];
 

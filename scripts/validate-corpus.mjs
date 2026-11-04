@@ -12,6 +12,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+// 复用渲染器里的 slugify，保证校验用的锚点规则与真正渲染时完全一致。
+import { slugify } from "../src/rag/markdown.mjs";
 
 const MIN_TEXT = 90;
 const MAX_TEXT = 600;
@@ -144,6 +146,36 @@ for (const doc of corpus.documents ?? []) {
       }
     }
   });
+}
+
+// 渲染后 id 必须唯一：阅读器用 querySelector('[id="<anchor>"]') 定位，只取第一个匹配。
+// 同一个分册文件会被整体渲染，所以「文档标题锚点」与「小节锚点」共享命名空间，
+// 一旦碰撞就会让某个小节无法被唯一定位（点「查看原文」跳到文档标题而不是正文）。
+{
+  const bySource = new Map();
+  for (const doc of corpus.documents ?? []) {
+    const sourcePath = doc?.source?.path;
+    if (!sourcePath) continue;
+    if (!bySource.has(sourcePath)) bySource.set(sourcePath, []);
+    bySource.get(sourcePath).push(doc);
+  }
+  for (const [sourcePath, docs] of bySource) {
+    const seen = new Map();
+    const note = (id, what) => {
+      const prev = seen.get(id);
+      if (prev) {
+        fail(`${sourcePath} 渲染后 id "${id}" 重复：${prev} 与 ${what}`);
+      } else {
+        seen.set(id, what);
+      }
+    };
+    for (const doc of docs) {
+      note(`doc-${slugify(doc.title || doc.id || "document")}`, `文档标题「${doc.title}」`);
+      for (const chunk of doc.chunks ?? []) {
+        if (chunk?.anchor) note(String(chunk.anchor), `小节「${chunk.heading}」`);
+      }
+    }
+  }
 }
 
 for (const category of categoryIds) {

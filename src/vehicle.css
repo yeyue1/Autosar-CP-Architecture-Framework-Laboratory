@@ -13,7 +13,7 @@
   align-items: center;
   gap: 7px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--fs-sm);
 }
 
 .vehicle-toolbar select {
@@ -26,7 +26,7 @@
 
 .vehicle-toolbar > span {
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--fs-sm);
   margin-left: auto;
 }
 
@@ -40,7 +40,7 @@
   border-radius: 7px;
   background: #f2faf8;
   color: #55766f;
-  font: 10px var(--mono);
+  font: var(--fs-sm) var(--mono);
 }
 
 .lab-switcher {
@@ -56,7 +56,16 @@
 
 @media (max-width: 720px) {
   .vehicle-toolbar { margin: 8px 10px 0; padding: 9px; }
-  .vehicle-toolbar .button { padding: 6px 8px; font-size: 9px; }
+  .vehicle-toolbar .button { padding: 6px 8px; font-size: var(--fs-xs); }
   .vehicle-timing { margin: 8px 12px 0; }
-  .lab-switcher { grid-template-columns: repeat(7, minmax(112px, 1fr)); overflow-x: auto; }
+  /*
+   * 窄屏必须回到「多行网格」，不能沿用 7 列横向滚动：
+   * 7 列会把 8 个入口排成"一行 7 个 + 第二行孤零零 1 个"，
+   * 还会把第 4 个入口切掉半截。3 列 × 3 行刚好放下 8 个入口。
+   */
+  .lab-switcher {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow-x: visible;
+    scrollbar-width: auto;
+  }
 }

@@ -283,6 +283,93 @@ async function loadCorpus() {
   return JSON.parse(raw);
 }
 
+test('同一个 .md 渲染出的所有 id 互不重复', async () => {
+  // 阅读器用 querySelector('[id="<anchor>"]') 定位，只拿第一个匹配。
+  // 一旦同一文件里出现两个相同 id，点「查看原文」就会跳到错的那个。
+  // 真实案例：09-boundary.md 里有一篇文档标题与它自己的首个小节同名。
+  const corpus = await loadCorpus();
+  const sourcePaths = [...new Set(
+    (corpus.documents ?? []).map(doc => doc?.source?.path).filter(Boolean),
+  )];
+  assert.ok(sourcePaths.length > 0, '语料应引用至少一个分册');
+
+  const problems = [];
+  let totalIds = 0;
+  for (const sourcePath of sourcePaths) {
+    const markdown = await readFile(path.join(repoRoot, sourcePath), 'utf8');
+    const article = parseArticle(markdown, { path: sourcePath });
+    const html = renderArticle(article);
+
+    const ids = [...html.matchAll(/id="([^"]+)"/g)].map(match => match[1]);
+    totalIds += ids.length;
+    const seen = new Map();
+    for (const id of ids) {
+      const count = (seen.get(id) ?? 0) + 1;
+      seen.set(id, count);
+      if (count === 2) problems.push(`${sourcePath}: id="${id}" 出现多次`);
+    }
+  }
+
+  assert.ok(totalIds > 100, `应检查到足够多的 id，实际 ${totalIds}`);
+  assert.deepEqual(problems, [], `存在重复 id：\n${problems.join('\n')}`);
+});
+
+test('文档级 H1 的 id 使用 doc- 前缀，不占用小节锚点命名空间', async () => {
+  const corpus = await loadCorpus();
+  const doc = (corpus.documents ?? []).find(item => item?.source?.path);
+  assert.ok(doc);
+
+  const markdown = await readFile(path.join(repoRoot, doc.source.path), 'utf8');
+  const article = parseArticle(markdown, { path: doc.source.path });
+  const html = renderArticle(article);
+
+  // 每个 rag-doc 都应该有一个 doc- 开头的 H1 id，且数量等于文档数。
+  const docIds = [...html.matchAll(/<h1 id="(doc-[^"]+)"/g)].map(match => match[1]);
+  assert.equal(docIds.length, article.documents.length, '每篇文档应有且仅有一个 H1 锚点');
+  assert.equal(new Set(docIds).size, docIds.length, '文档级 id 之间不应重复');
+
+  // 小节锚点里不应该混进 doc- 前缀（否则说明让位逻辑被写反了）。
+  for (const item of article.documents) {
+    for (const section of item.sections) {
+      assert.equal(
+        section.anchor.startsWith('doc-'),
+        false,
+        `小节锚点不该以 doc- 开头：${section.anchor}`,
+      );
+    }
+  }
+});
+
+test('标题与小节同名的文档，该小节仍能被唯一定位', async () => {
+  // 这条直接复现那个真实缺陷：文档标题 == 它自己的小节标题。
+  const corpus = await loadCorpus();
+  const markdown = await readFile(
+    path.join(repoRoot, 'knowledge/09-boundary.md'), 'utf8');
+  const article = parseArticle(markdown, { path: 'knowledge/09-boundary.md' });
+  const html = renderArticle(article);
+
+  // 找到标题与某个小节标题相同的文档。
+  const clash = article.documents.find(item =>
+    item.sections.some(section => slugify(section.heading) === slugify(item.title)));
+  assert.ok(clash, '这份分册里应仍存在标题与小节同名的文档（回归前提）');
+
+  const section = clash.sections.find(item => slugify(item.heading) === slugify(clash.title));
+  const occurrences = [...html.matchAll(new RegExp(`id="${section.anchor}"`, 'g'))];
+  assert.equal(occurrences.length, 1, `小节 id 应只出现一次：${section.anchor}`);
+
+  // H1 拿到了独立的 doc- 前缀，因此 querySelector 命中的是小节而不是标题。
+  assert.equal(html.includes(`id="doc-${section.anchor}"`), true,
+    '文档标题应让位到 doc- 命名空间');
+
+  // findSection 仍然只认小节，定位结果不变。
+  const located = findSection(article, section.anchor);
+  assert.equal(located?.section?.anchor, section.anchor);
+  assert.equal(located?.document?.id, clash.id);
+
+  const known = new Set((corpus.documents ?? []).flatMap(item => (item.chunks ?? []).map(c => c.anchor)));
+  assert.equal(known.has(section.anchor), true, '该小节锚点应仍在语料里');
+});
+
 test('语料里每个 chunk.anchor 都能被 renderArticle 渲染出的 id 命中', async () => {
   const corpus = await loadCorpus();
   const documents = Array.isArray(corpus.documents) ? corpus.documents : [];

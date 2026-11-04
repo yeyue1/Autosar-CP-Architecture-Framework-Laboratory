@@ -163,6 +163,7 @@ node scripts/export-trace.mjs --scenario nvm-crc --duration 250 --out .runtime/n
 | [src/rag/article.mjs](src/rag/article.mjs) | 文章模型：解析元数据与小节、渲染带 `id` 锚点的 HTML、按锚点查找 |
 | [src/rag-ui.mjs](src/rag-ui.mjs) / [src/rag.css](src/rag.css) | 知识库工作区界面 |
 | [src/rag-reader.mjs](src/rag-reader.mjs) / [src/rag-reader.css](src/rag-reader.css) | 应用内文章阅读器：滑出面板、目录、锚点定位与高亮 |
+| [src/typography.css](src/typography.css) | 流体字号标尺（`--fs-4xs` … `--fs-base`），替代原先 5–11px 的固定小字号 |
 | [server.mjs](server.mjs) | 只绑定本机地址、白名单路径的静态 HTTP 服务 |
 | [scripts/build-corpus.mjs](scripts/build-corpus.mjs) | 由 `knowledge/*.md` 生成 `corpus.json` |
 | [scripts/validate-corpus.mjs](scripts/validate-corpus.mjs) | 语料库契约校验 |
@@ -187,6 +188,7 @@ node scripts/export-trace.mjs --scenario nvm-crc --duration 250 --out .runtime/n
 - NvM 恢复后再放行业务是本示例的门控策略，不是所有版本/项目通用的唯一顺序。
 - 知识库是**检索式 RAG**：它计算词频与共现，不理解语义，也不使用神经嵌入或向量检索；答案由语料原文抽句拼成，不会超出语料范围，也可能因为换了说法就检索不到。语料是原创教学文本，不是 AUTOSAR 规范原文，不能作为一致性或合规依据。
 - 应用内阅读器只是渲染器，不提供编辑、批注或版本对比；它定位的依据是「小节标题算出的锚点」，所以改标题会改锚点——这是设计使然。
+- 字号用 `clamp()` 随视口宽度插值，不是跟随用户系统字号设置；它是一个自足的标尺（约 9.5–15.5px），不承诺符合 WCAG 或任何可访问性标准。
 - 浏览器验证脚本需要放宽沙箱权限才能启动 Chrome（Windows 上 Mojo IPC 依赖命名管道），这不影响应用本身运行。
 
 想进一步落到真实工程时，应基于明确的 MCU、BSW 供应商、OS 和配置工具另建集成环境，并核对对应版本规范。本实验室适合在此之前理解依赖关系和调试思路。
